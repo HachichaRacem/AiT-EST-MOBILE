@@ -72,10 +72,18 @@ class HomeScreen extends GetView<HomeController> {
                 ListTile(
                   title: const Text("Leads Management"),
                   onTap: () {
-                    if (controller.routesHistory.last != "/leadsManagement") {
+                    Get.log("[PopUntil]: histroy: ${controller.routesHistory}");
+                    _scaffoldKey.currentState?.closeDrawer();
+                    if (controller.routesHistory.contains("/leadsManagement")) {
+                      if (controller.routesHistory.last != "/leadsManagement") {
+                        Get.nestedKey(0)!.currentState?.popUntil((route) {
+                          controller.routesHistory.removeLast();
+                          return controller.routesHistory.last == "/leadsManagement";
+                        });
+                      }
+                    } else {
                       Get.nestedKey(0)!.currentState?.pushNamed('/leadsManagement');
                     }
-                    _scaffoldKey.currentState?.closeDrawer();
                   },
                 )
             ],
@@ -85,8 +93,12 @@ class HomeScreen extends GetView<HomeController> {
           preferredSize: const Size.fromHeight(80),
           child: CustomAppBar(
             firstName: "${controller.user.firstName}",
-            leading: const DrawerButton(
-              style: ButtonStyle(
+            leading: DrawerButton(
+              onPressed: () {
+                controller.routesHistory.add("/drawer");
+                _scaffoldKey.currentState?.openDrawer();
+              },
+              style: const ButtonStyle(
                 iconColor: MaterialStatePropertyAll(Colors.white),
               ),
             ),

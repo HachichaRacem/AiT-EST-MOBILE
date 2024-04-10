@@ -142,10 +142,10 @@ class EpSingleProfileScreen extends StatelessWidget {
                                               context: context,
                                               title: Text(message),
                                               type: ToastificationType.info,
-                                              style: ToastificationStyle.simple,
+                                              style: ToastificationStyle.flat,
                                               closeOnClick: true,
                                               autoCloseDuration: const Duration(
-                                                seconds: 3,
+                                                seconds: 2,
                                               ),
                                             );
                                           },

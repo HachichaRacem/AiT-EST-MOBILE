@@ -37,7 +37,9 @@ class MainController extends GetxController {
       final requestMethod = error.requestOptions.method;
       final requestHeaders = error.requestOptions.headers;
       final requestUrl = error.requestOptions.path;
+
       requestQueryParams['access_token'] = refreshReq.data['access_token'];
+
       if (requestHeaders.containsKey('Authorization')) {
         requestHeaders['Authorization'] = refreshReq.data['access_token'];
       }
@@ -60,6 +62,7 @@ class MainController extends GetxController {
     dio.interceptors.add(
       InterceptorsWrapper(
         onError: (error, handler) async {
+          Get.log("$error");
           if (error.type == DioExceptionType.connectionTimeout) {
             Get.showSnackbar(
               GetSnackBar(
@@ -114,10 +117,13 @@ class MainController extends GetxController {
                   await _refreshToken(error, handler);
                 } catch (e) {
                   Get.showSnackbar(
-                    const GetSnackBar(
-                      message: 'Session expired.',
-                      duration: Duration(seconds: 3),
-                      isDismissible: true,
+                    GetSnackBar(
+                      messageText: Text("Session expired",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.lato(color: Colors.white)),
+                      duration: const Duration(seconds: 3),
+                      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                      borderRadius: 16,
                     ),
                   );
                   if (Get.currentRoute == '/auth') {

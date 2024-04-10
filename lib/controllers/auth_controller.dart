@@ -42,8 +42,7 @@ class AuthController extends GetxController {
       'https://gis-api.aiesec.org/v2/current_person/personal_dump',
       queryParameters: {'access_token': accessToken},
     );
-    MainController.user = User(response.data,
-        accessToken: accessToken, refreshToken: refreshToken);
+    MainController.user = User(response.data, accessToken: accessToken, refreshToken: refreshToken);
   }
 
   Future<void> _authenticateUser() async {
@@ -61,8 +60,8 @@ class AuthController extends GetxController {
 
   Future<void> _updateSP(String accessToken, String refreshToken) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString('access_token', accessToken);
-    prefs.setString('refresh_token', refreshToken);
+    await prefs.setString('access_token', accessToken);
+    await prefs.setString('refresh_token', refreshToken);
   }
 
   void onRefreshClick() {
@@ -72,10 +71,8 @@ class AuthController extends GetxController {
 
   Future<AjaxRequestAction?> onAjaxReadyStateChange(
       InAppWebViewController webController, AjaxRequest ajaxRequest) async {
-    if (ajaxRequest.url!.path.contains('/oauth/token') &&
-        ajaxRequest.responseText!.isNotEmpty) {
-      final Map<String, dynamic> response =
-          jsonDecode(ajaxRequest.responseText!);
+    if (ajaxRequest.url!.path.contains('/oauth/token') && ajaxRequest.responseText!.isNotEmpty) {
+      final Map<String, dynamic> response = jsonDecode(ajaxRequest.responseText!);
       await webController.stopLoading();
       await CookieManager.instance().deleteAllCookies();
       await webController.platform.clearAllCache();
@@ -83,8 +80,7 @@ class AuthController extends GetxController {
       try {
         if (!caughtAccessToken) {
           caughtAccessToken = true;
-          await _loadUserData(
-              response['access_token'], response['refresh_token']);
+          await _loadUserData(response['access_token'], response['refresh_token']);
           await _updateSP(response['access_token'], response['refresh_token']);
           Get.offAllNamed('/home');
         }
