@@ -133,7 +133,14 @@ class HomeScreen extends GetView<HomeController> {
                   case '/epProfile':
                     return GetPageRoute(
                       routeName: '/epProfile',
-                      page: () => EpProfileScreen(epData: settings.arguments as Map),
+                      page: () {
+                        final Map<String, dynamic> arguments =
+                            settings.arguments as Map<String, dynamic>;
+                        return EpsProfilesScreen(
+                          data: arguments['data'],
+                          openedEpIndex: arguments['index'],
+                        );
+                      },
                       transition: Transition.downToUp,
                     );
                   case '/leadsManagement':
