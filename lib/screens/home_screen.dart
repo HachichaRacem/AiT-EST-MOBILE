@@ -48,6 +48,13 @@ class HomeScreen extends GetView<HomeController> {
       child: Scaffold(
         key: _scaffoldKey,
         backgroundColor: Colors.transparent,
+        onDrawerChanged: (isOpened) {
+          if (isOpened) {
+            controller.routesHistory.add("/drawer");
+          } else {
+            controller.routesHistory.removeWhere((element) => element == "/drawer");
+          }
+        },
         drawer: Drawer(
           child: Column(
             children: [
@@ -72,18 +79,21 @@ class HomeScreen extends GetView<HomeController> {
                 ListTile(
                   title: const Text("Leads Management"),
                   onTap: () {
-                    Get.log("[PopUntil]: histroy: ${controller.routesHistory}");
+                    Get.offNamed("/leadsManagement", id: 0);
+                    /*Get.log("[PopUntil]: histroy: ${controller.routesHistory}");
                     _scaffoldKey.currentState?.closeDrawer();
+                    Get.log("[PopUntil]: histroy after: ${controller.routesHistory}");
                     if (controller.routesHistory.contains("/leadsManagement")) {
                       if (controller.routesHistory.last != "/leadsManagement") {
                         Get.nestedKey(0)!.currentState?.popUntil((route) {
                           controller.routesHistory.removeLast();
                           return controller.routesHistory.last == "/leadsManagement";
                         });
+                        Get.nestedKey(0)!.currentState?.pop();
                       }
                     } else {
                       Get.nestedKey(0)!.currentState?.pushNamed('/leadsManagement');
-                    }
+                    }*/
                   },
                 )
             ],
@@ -93,12 +103,8 @@ class HomeScreen extends GetView<HomeController> {
           preferredSize: const Size.fromHeight(80),
           child: CustomAppBar(
             firstName: "${controller.user.firstName}",
-            leading: DrawerButton(
-              onPressed: () {
-                controller.routesHistory.add("/drawer");
-                _scaffoldKey.currentState?.openDrawer();
-              },
-              style: const ButtonStyle(
+            leading: const DrawerButton(
+              style: ButtonStyle(
                 iconColor: MaterialStatePropertyAll(Colors.white),
               ),
             ),

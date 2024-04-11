@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../controllers/eps_controller.dart';
+
 class AssignToDialog extends StatelessWidget {
   const AssignToDialog({super.key});
 
@@ -76,7 +78,52 @@ class AssignToDialog extends StatelessWidget {
 
 class AssignConfirmDialog extends StatelessWidget {
   final String selectedMember;
-  const AssignConfirmDialog({super.key, required this.selectedMember});
+  final RxInt _currentState = RxInt(0); // 0 - static, 1 - loading, 2 - error
+  AssignConfirmDialog({super.key, required this.selectedMember});
+
+  Future<void> _onConfirmClick() async {
+    _currentState.value = 1;
+    final EpsController epController = Get.find();
+    const baseURL = "http://192.168.1.11:3000/updateMemberName";
+    List<Future> requestsToSend = [];
+    for (final epIndex in epController.selectedEPsList) {
+      final String epID = epController.departmentEPs[epIndex]['EP ID'];
+      if (epID.isNotEmpty) {
+        Get.log("Updating : ${epController.departmentEPs[epIndex]['Full Name']}");
+        Get.log("URL : $baseURL/$epID");
+        requestsToSend.add(MainController.dio
+            .put("$baseURL/$epID", data: {"newMemberName": selectedMember.substring(0, 6)}));
+      } else {
+        final String epName = epController.departmentEPs[epIndex]['Full Name'];
+        Get.showSnackbar(
+          GetSnackBar(
+            messageText: Text(
+              "Will not update $epName: missing EP ID",
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.lato(color: Colors.white),
+            ),
+            duration: const Duration(seconds: 3),
+            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+            borderRadius: 16,
+          ),
+        );
+      }
+    }
+    // VERIFY BACKEND
+    /*try {
+      final responses = await Future.wait(requestsToSend);
+      for (final response in responses) {
+        Get.log("${response.data}");
+        _currentState.value = 0;
+      }
+    } catch (e) {
+      Get.log("$e");
+      _currentState.value = 2;
+    }*/
+    _currentState.value = 0;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +155,7 @@ class AssignConfirmDialog extends StatelessWidget {
         selectedMember,
         textAlign: TextAlign.center,
       ),
-      actionsAlignment: MainAxisAlignment.spaceEvenly,
+      actionsAlignment: MainAxisAlignment.spaceBetween,
       actions: [
         ElevatedButton(
           onPressed: () {},
@@ -118,29 +165,50 @@ class AssignConfirmDialog extends StatelessWidget {
             foregroundColor: const MaterialStatePropertyAll(
               Color(0xFFE70013),
             ),
+            overlayColor: const MaterialStatePropertyAll(Color.fromARGB(20, 244, 67, 54)),
             shape: MaterialStatePropertyAll(
               RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  side: const BorderSide(color: Color(0xFFE70013))),
+                borderRadius: BorderRadius.circular(8),
+                side: const BorderSide(
+                  color: Color(0xFFE70013),
+                ),
+              ),
             ),
           ),
           child: const Text("Cancel"),
         ),
         ElevatedButton(
-          onPressed: () {},
+          onPressed: _onConfirmClick,
           style: ButtonStyle(
             backgroundColor: const MaterialStatePropertyAll(Color(0xFF32D583)),
             surfaceTintColor: const MaterialStatePropertyAll(Color(0xFF32D583)),
             foregroundColor: const MaterialStatePropertyAll(Colors.white),
+            overlayColor: const MaterialStatePropertyAll(Colors.white12),
             shape: MaterialStatePropertyAll(
               RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
           ),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.0),
-            child: Icon(Icons.check),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 26.0),
+            child: Obx(
+              () {
+                switch (_currentState.value) {
+                  case 0:
+                    return const Icon(Icons.check);
+                  case 1:
+                    return const SizedBox(
+                        height: 12,
+                        width: 12,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 1.5));
+                  case 2:
+                    return const Icon(Icons.error);
+                  default:
+                    return const Icon(Icons.check);
+                }
+              },
+            ),
           ),
         )
       ],
