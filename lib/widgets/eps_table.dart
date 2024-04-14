@@ -272,8 +272,11 @@ class EpsTable extends GetView<EpsController> {
           ? <Type, GestureRecognizerFactory>{
               TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
                 () => TapGestureRecognizer(),
-                (TapGestureRecognizer t) => t.onTap = () =>
-                    Get.nestedKey(0)!.currentState?.pushNamed('/epProfile', arguments: data[index]),
+                (TapGestureRecognizer t) => t.onTap = () => Get.toNamed(
+                      '/epProfile',
+                      id: 0,
+                      arguments: <String, dynamic>{"data": data.sublist(1), "index": index},
+                    ),
               ),
             }
           : {},

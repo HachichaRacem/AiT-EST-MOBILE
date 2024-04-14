@@ -1,4 +1,5 @@
 import 'package:aiesec_im/controllers/eps_controller.dart';
+import 'package:aiesec_im/widgets/ep_assign_dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -48,8 +49,11 @@ class EpsHeader extends GetView<EpsController> {
                       height: 28,
                       child: Obx(
                         () => IconButton(
-                          onPressed:
-                              controller.selectedEPsList.isEmpty ? null : () => Get.log("Person add pressed"),
+                          onPressed: controller.selectedEPsList.isEmpty
+                              ? null
+                              : () {
+                                  Get.dialog(const AssignToDialog());
+                                },
                           icon: const Icon(
                             Icons.person_add_rounded,
                           ),
@@ -65,8 +69,9 @@ class EpsHeader extends GetView<EpsController> {
                         height: 26,
                         child: Obx(
                           () => IconButton(
-                            onPressed:
-                                controller.selectedEPsList.isEmpty ? null : () => Get.log("Remove pressed"),
+                            onPressed: controller.selectedEPsList.isEmpty
+                                ? null
+                                : () => Get.log("Remove pressed"),
                             icon: const Icon(
                               Icons.delete_forever_outlined,
                             ),

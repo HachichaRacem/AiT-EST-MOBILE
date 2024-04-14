@@ -3,6 +3,7 @@ import 'package:aiesec_im/controllers/home_controller.dart';
 import 'package:aiesec_im/screens/ep_profile_screen.dart';
 import 'package:aiesec_im/screens/eps_screen.dart';
 import 'package:aiesec_im/screens/leads_management_screen.dart';
+import 'package:aiesec_im/utils/nav_observer.dart';
 import 'package:aiesec_im/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -72,8 +73,10 @@ class HomeScreen extends GetView<HomeController> {
                 ListTile(
                   title: const Text("Leads Management"),
                   onTap: () {
-                    if (controller.routesHistory.last != "/leadsManagement") {
-                      Get.nestedKey(0)!.currentState?.pushNamed('/leadsManagement');
+                    if (MyObserver.history.contains('/leadsManagement')) {
+                      Get.until((route) => MyObserver.history.last == '/leadsManagement', id: 0);
+                    } else {
+                      Get.toNamed('/leadsManagement', id: 0);
                     }
                     _scaffoldKey.currentState?.closeDrawer();
                   },
@@ -115,6 +118,7 @@ class HomeScreen extends GetView<HomeController> {
               color: Colors.white,
             ),
             child: Navigator(
+              observers: [MyObserver()],
               key: Get.nestedKey(0),
               initialRoute: '/',
               onGenerateRoute: (settings) {
@@ -125,6 +129,7 @@ class HomeScreen extends GetView<HomeController> {
                   case '/':
                     return GetPageRoute(
                       routeName: '/',
+                      settings: const RouteSettings(name: '/'),
                       page: () => const EpsScreen(),
                       binding: BindingsBuilder.put(
                         () => EpsController(),
@@ -133,12 +138,21 @@ class HomeScreen extends GetView<HomeController> {
                   case '/epProfile':
                     return GetPageRoute(
                       routeName: '/epProfile',
-                      page: () => EpProfileScreen(epData: settings.arguments as Map),
+                      settings: const RouteSettings(name: '/epProfile'),
+                      page: () {
+                        final Map<String, dynamic> arguments =
+                            settings.arguments as Map<String, dynamic>;
+                        return EpsProfilesScreen(
+                          data: arguments['data'],
+                          openedEpIndex: arguments['index'],
+                        );
+                      },
                       transition: Transition.downToUp,
                     );
                   case '/leadsManagement':
                     return GetPageRoute(
                       routeName: '/leadsManagement',
+                      settings: const RouteSettings(name: '/leadsManagement'),
                       page: () => const LeadsManagementScreen(),
                       transition: Transition.downToUp,
                       binding: BindingsBuilder.put(
@@ -148,6 +162,7 @@ class HomeScreen extends GetView<HomeController> {
                   default:
                     return GetPageRoute(
                       routeName: '/',
+                      settings: const RouteSettings(name: '/'),
                       page: () => const EpsScreen(),
                       binding: BindingsBuilder.put(
                         () => EpsController(),

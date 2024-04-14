@@ -25,15 +25,15 @@ class HomeController extends GetxController {
     'November',
     'December'
   ];
-
   final tableColumns = ['Name', 'EP ID', 'Phone number'];
 
   @override
   void onInit() {
+    // Helps with the application quit confirmation flow, resets the value to false if the user does not confirm the exit
+    // once the popup is displayed which lasts for 5 seconds.
     hasConfirmedExit.listen((value) {
       if (value) {
-        Future.delayed(
-            const Duration(seconds: 5), () => hasConfirmedExit.value = false);
+        Future.delayed(const Duration(seconds: 5), () => hasConfirmedExit.value = false);
       }
     });
     super.onInit();

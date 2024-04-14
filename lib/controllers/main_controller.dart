@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MainController extends GetxController {
+  // Dio instance (for handling network communication)
   static final Dio dio = Dio(
     BaseOptions(
       followRedirects: true,
@@ -16,8 +17,11 @@ class MainController extends GetxController {
       receiveTimeout: const Duration(minutes: 1),
     ),
   );
+
+  // Main instance of the User
   static User? user;
 
+  // Used to refresh the user token when needed and resends the failed request.
   Future<void> _refreshToken(DioException error, ErrorInterceptorHandler handler) async {
     final prefs = await SharedPreferences.getInstance();
     final refreshToken = prefs.getString('refresh_token');
@@ -37,7 +41,9 @@ class MainController extends GetxController {
       final requestMethod = error.requestOptions.method;
       final requestHeaders = error.requestOptions.headers;
       final requestUrl = error.requestOptions.path;
+
       requestQueryParams['access_token'] = refreshReq.data['access_token'];
+
       if (requestHeaders.containsKey('Authorization')) {
         requestHeaders['Authorization'] = refreshReq.data['access_token'];
       }
@@ -55,11 +61,15 @@ class MainController extends GetxController {
     }
   }
 
+  // Adds an interceptor to the Dio instance
+  // which handles errors, mainly to handle any failed requests due to expired access token
+  // but also handles other errors
   @override
   void onInit() {
     dio.interceptors.add(
       InterceptorsWrapper(
         onError: (error, handler) async {
+          Get.log("$error");
           if (error.type == DioExceptionType.connectionTimeout) {
             Get.showSnackbar(
               GetSnackBar(
@@ -114,10 +124,13 @@ class MainController extends GetxController {
                   await _refreshToken(error, handler);
                 } catch (e) {
                   Get.showSnackbar(
-                    const GetSnackBar(
-                      message: 'Session expired.',
-                      duration: Duration(seconds: 3),
-                      isDismissible: true,
+                    GetSnackBar(
+                      messageText: Text("Session expired",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.lato(color: Colors.white)),
+                      duration: const Duration(seconds: 3),
+                      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                      borderRadius: 16,
                     ),
                   );
                   if (Get.currentRoute == '/auth') {
