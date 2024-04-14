@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthController extends GetxController {
+  // Tag used for debugging purposes
   final String _tag = 'AuthController';
 
   /* General state management */
@@ -19,6 +20,7 @@ class AuthController extends GetxController {
   final RxBool hasErrors = RxBool(false);
   String? errorMessage;
 
+  // Called once the screen is building
   @override
   void onReady() async {
     try {
@@ -37,6 +39,7 @@ class AuthController extends GetxController {
     super.onReady();
   }
 
+  // Loads user data using EXPA endpoint with accessToken provided from the login flow or stored previously
   Future<void> _loadUserData(String accessToken, String refreshToken) async {
     final response = await MainController.dio.get(
       'https://gis-api.aiesec.org/v2/current_person/personal_dump',
@@ -45,6 +48,8 @@ class AuthController extends GetxController {
     MainController.user = User(response.data, accessToken: accessToken, refreshToken: refreshToken);
   }
 
+  // Verifies if token exists before on device storage then proceeds to load user data using EXPA
+  // Otherwise, it throws a NoAccountException which is handled in the onReady method.
   Future<void> _authenticateUser() async {
     final prefs = await SharedPreferences.getInstance();
     if (prefs.containsKey('access_token')) {
@@ -58,17 +63,22 @@ class AuthController extends GetxController {
     }
   }
 
+  // Method used to update the SharedPreference with the access and refresh tokens passed to it.
   Future<void> _updateSP(String accessToken, String refreshToken) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('access_token', accessToken);
     await prefs.setString('refresh_token', refreshToken);
   }
 
+  // Click handlers
   void onRefreshClick() {
     sendToEXPA.value = true;
     hasErrors.value = false;
   }
 
+  // WebView handlers (You can consider this part as the registration flow)
+  // onAjaxReadyStateChange called as the requests are exchanged, it "listens" to the one holding the access token
+  // then stores it, loads user data, updates SP and handles errors.
   Future<AjaxRequestAction?> onAjaxReadyStateChange(
       InAppWebViewController webController, AjaxRequest ajaxRequest) async {
     if (ajaxRequest.url!.path.contains('/oauth/token') && ajaxRequest.responseText!.isNotEmpty) {

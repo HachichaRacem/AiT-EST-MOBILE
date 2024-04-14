@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MainController extends GetxController {
+  // Dio instance (for handling network communication)
   static final Dio dio = Dio(
     BaseOptions(
       followRedirects: true,
@@ -16,8 +17,11 @@ class MainController extends GetxController {
       receiveTimeout: const Duration(minutes: 1),
     ),
   );
+
+  // Main instance of the User
   static User? user;
 
+  // Used to refresh the user token when needed and resends the failed request.
   Future<void> _refreshToken(DioException error, ErrorInterceptorHandler handler) async {
     final prefs = await SharedPreferences.getInstance();
     final refreshToken = prefs.getString('refresh_token');
@@ -57,6 +61,9 @@ class MainController extends GetxController {
     }
   }
 
+  // Adds an interceptor to the Dio instance
+  // which handles errors, mainly to handle any failed requests due to expired access token
+  // but also handles other errors
   @override
   void onInit() {
     dio.interceptors.add(

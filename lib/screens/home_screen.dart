@@ -3,6 +3,7 @@ import 'package:aiesec_im/controllers/home_controller.dart';
 import 'package:aiesec_im/screens/ep_profile_screen.dart';
 import 'package:aiesec_im/screens/eps_screen.dart';
 import 'package:aiesec_im/screens/leads_management_screen.dart';
+import 'package:aiesec_im/utils/nav_observer.dart';
 import 'package:aiesec_im/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -48,13 +49,6 @@ class HomeScreen extends GetView<HomeController> {
       child: Scaffold(
         key: _scaffoldKey,
         backgroundColor: Colors.transparent,
-        onDrawerChanged: (isOpened) {
-          if (isOpened) {
-            controller.routesHistory.add("/drawer");
-          } else {
-            controller.routesHistory.removeWhere((element) => element == "/drawer");
-          }
-        },
         drawer: Drawer(
           child: Column(
             children: [
@@ -79,21 +73,12 @@ class HomeScreen extends GetView<HomeController> {
                 ListTile(
                   title: const Text("Leads Management"),
                   onTap: () {
-                    Get.offNamed("/leadsManagement", id: 0);
-                    /*Get.log("[PopUntil]: histroy: ${controller.routesHistory}");
-                    _scaffoldKey.currentState?.closeDrawer();
-                    Get.log("[PopUntil]: histroy after: ${controller.routesHistory}");
-                    if (controller.routesHistory.contains("/leadsManagement")) {
-                      if (controller.routesHistory.last != "/leadsManagement") {
-                        Get.nestedKey(0)!.currentState?.popUntil((route) {
-                          controller.routesHistory.removeLast();
-                          return controller.routesHistory.last == "/leadsManagement";
-                        });
-                        Get.nestedKey(0)!.currentState?.pop();
-                      }
+                    if (MyObserver.history.contains('/leadsManagement')) {
+                      Get.until((route) => MyObserver.history.last == '/leadsManagement', id: 0);
                     } else {
-                      Get.nestedKey(0)!.currentState?.pushNamed('/leadsManagement');
-                    }*/
+                      Get.toNamed('/leadsManagement', id: 0);
+                    }
+                    _scaffoldKey.currentState?.closeDrawer();
                   },
                 )
             ],
@@ -133,6 +118,7 @@ class HomeScreen extends GetView<HomeController> {
               color: Colors.white,
             ),
             child: Navigator(
+              observers: [MyObserver()],
               key: Get.nestedKey(0),
               initialRoute: '/',
               onGenerateRoute: (settings) {
@@ -143,6 +129,7 @@ class HomeScreen extends GetView<HomeController> {
                   case '/':
                     return GetPageRoute(
                       routeName: '/',
+                      settings: const RouteSettings(name: '/'),
                       page: () => const EpsScreen(),
                       binding: BindingsBuilder.put(
                         () => EpsController(),
@@ -151,6 +138,7 @@ class HomeScreen extends GetView<HomeController> {
                   case '/epProfile':
                     return GetPageRoute(
                       routeName: '/epProfile',
+                      settings: const RouteSettings(name: '/epProfile'),
                       page: () {
                         final Map<String, dynamic> arguments =
                             settings.arguments as Map<String, dynamic>;
@@ -164,6 +152,7 @@ class HomeScreen extends GetView<HomeController> {
                   case '/leadsManagement':
                     return GetPageRoute(
                       routeName: '/leadsManagement',
+                      settings: const RouteSettings(name: '/leadsManagement'),
                       page: () => const LeadsManagementScreen(),
                       transition: Transition.downToUp,
                       binding: BindingsBuilder.put(
@@ -173,6 +162,7 @@ class HomeScreen extends GetView<HomeController> {
                   default:
                     return GetPageRoute(
                       routeName: '/',
+                      settings: const RouteSettings(name: '/'),
                       page: () => const EpsScreen(),
                       binding: BindingsBuilder.put(
                         () => EpsController(),

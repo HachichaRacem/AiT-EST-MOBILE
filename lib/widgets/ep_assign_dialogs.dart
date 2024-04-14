@@ -123,6 +123,8 @@ class AssignConfirmDialog extends StatelessWidget {
       _currentState.value = 2;
     }*/
     _currentState.value = 0;
+    epController.epsScreenNeedsUpdate = true;
+    Get.back();
   }
 
   @override

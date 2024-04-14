@@ -37,16 +37,10 @@ class AuthScren extends GetView<AuthController> {
                 index: controller.sendToEXPA.value ? 0 : 1,
                 children: [
                   InAppWebView(
-                    initialSettings:
-                        InAppWebViewSettings(transparentBackground: true),
+                    initialSettings: InAppWebViewSettings(transparentBackground: true),
                     initialUrlRequest: URLRequest(
                       url: WebUri('https://expa.aiesec.org'),
                     ),
-                    onLoadStop: (webController, url) {
-                      if (url?.path == '/users/sign_in') {
-                        controller.sendToEXPA.value = true;
-                      }
-                    },
                     onLoadStart: (webController, url) {
                       if (url?.path == '/') {
                         controller.sendToEXPA.value = false;

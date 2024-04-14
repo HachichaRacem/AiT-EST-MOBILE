@@ -271,13 +271,13 @@ class EpsTable extends GetView<EpsController> {
       recognizerFactories: index != 0
           ? <Type, GestureRecognizerFactory>{
               TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-                  () => TapGestureRecognizer(),
-                  (TapGestureRecognizer t) => t.onTap = () => Get.toNamed('/epProfile',
-                      id: 0, arguments: <String, dynamic>{"data": data.sublist(1), "index": index})
-                  /*Get.nestedKey(0)!.currentState?.pushNamed('/epProfile',
-                      arguments: <String, dynamic>{"data": data.sublist(1), "index": index});*/
-
-                  ),
+                () => TapGestureRecognizer(),
+                (TapGestureRecognizer t) => t.onTap = () => Get.toNamed(
+                      '/epProfile',
+                      id: 0,
+                      arguments: <String, dynamic>{"data": data.sublist(1), "index": index},
+                    ),
+              ),
             }
           : {},
     );
