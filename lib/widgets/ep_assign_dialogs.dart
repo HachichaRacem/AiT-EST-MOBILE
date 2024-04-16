@@ -2,6 +2,7 @@ import 'package:aiesec_im/controllers/main_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:toastification/toastification.dart';
 
 import '../controllers/eps_controller.dart';
 
@@ -81,7 +82,7 @@ class AssignConfirmDialog extends StatelessWidget {
   final RxInt _currentState = RxInt(0); // 0 - static, 1 - loading, 2 - error
   AssignConfirmDialog({super.key, required this.selectedMember});
 
-  Future<void> _onConfirmClick() async {
+  Future<void> _onConfirmClick(BuildContext context) async {
     _currentState.value = 1;
     final EpsController epController = Get.find();
     const baseURL = "http://192.168.1.11:3000/updateMemberName";
@@ -95,19 +96,14 @@ class AssignConfirmDialog extends StatelessWidget {
             .put("$baseURL/$epID", data: {"newMemberName": selectedMember.substring(0, 6)}));
       } else {
         final String epName = epController.departmentEPs[epIndex]['Full Name'];
-        Get.showSnackbar(
-          GetSnackBar(
-            messageText: Text(
-              "Will not update $epName: missing EP ID",
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.lato(color: Colors.white),
-            ),
-            duration: const Duration(seconds: 3),
-            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-            borderRadius: 16,
-          ),
+        toastification.show(
+          context: context,
+          title: const Text("Warning"),
+          description: Text("Could not update $epName due to missing ID."),
+          type: ToastificationType.warning,
+          style: ToastificationStyle.minimal,
+          autoCloseDuration: const Duration(seconds: 5),
+          closeOnClick: true,
         );
       }
     }
@@ -160,7 +156,7 @@ class AssignConfirmDialog extends StatelessWidget {
       actionsAlignment: MainAxisAlignment.spaceBetween,
       actions: [
         ElevatedButton(
-          onPressed: () {},
+          onPressed: () => Get.back(),
           style: ButtonStyle(
             backgroundColor: const MaterialStatePropertyAll(Colors.white),
             surfaceTintColor: const MaterialStatePropertyAll(Colors.white),
@@ -180,7 +176,7 @@ class AssignConfirmDialog extends StatelessWidget {
           child: const Text("Cancel"),
         ),
         ElevatedButton(
-          onPressed: _onConfirmClick,
+          onPressed: () => _onConfirmClick(context),
           style: ButtonStyle(
             backgroundColor: const MaterialStatePropertyAll(Color(0xFF32D583)),
             surfaceTintColor: const MaterialStatePropertyAll(Color(0xFF32D583)),

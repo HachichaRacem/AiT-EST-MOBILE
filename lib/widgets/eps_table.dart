@@ -8,7 +8,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 class EpsTable extends GetView<EpsController> {
   final bool isManagementScreen;
-  const EpsTable({super.key, required this.isManagementScreen});
+  final ScrollController verticalController = ScrollController();
+  final ScrollController horizontalController = ScrollController();
+  EpsTable({super.key, required this.isManagementScreen});
 
   TableViewCell _buildCell(BuildContext context, TableVicinity vicinity) {
     const columns = ["Name", "EP ID", "Phone Number"];
@@ -17,41 +19,114 @@ class EpsTable extends GetView<EpsController> {
     final data = isManagementScreen ? controller.departmentEPs : controller.allocatedEPsList;
 
     if (vicinity.row == 0) {
-      if (vicinity.column == 1) {
-        return TableViewCell(
-          child: Padding(
-            padding: const EdgeInsets.only(left: paddingLeft),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    columns[vicinity.column],
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF475467),
-                    ),
-                  ),
-                  const Tooltip(
-                    triggerMode: TooltipTriggerMode.tap,
-                    message: "Unique ID on EXPA",
-                    child: Padding(
-                      padding: EdgeInsets.only(left: 5.0),
-                      child: Icon(
-                        Icons.help_outline_rounded,
-                        size: 14,
-                        color: Color(0xFF98A2B3),
+      switch (vicinity.column) {
+        case 0:
+          return TableViewCell(
+            child: Padding(
+              padding: const EdgeInsets.only(left: paddingLeft),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  children: [
+                    if (isManagementScreen)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 12.0),
+                        child: SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: Obx(
+                            () => Checkbox(
+                              splashRadius: 13,
+                              side: const BorderSide(
+                                width: 1.2,
+                                color: Color(0xFFD0D5DD),
+                              ),
+                              tristate: true,
+                              value: controller.selectedEPsList.isNotEmpty
+                                  ? controller.selectedEPsList.length >= data.length - 1
+                                      ? true
+                                      : null
+                                  : false,
+                              onChanged: controller.onEpsHeaderCheckboxClick,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    Text(
+                      columns[0],
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF475467),
                       ),
                     ),
-                  )
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      } else if (vicinity.column == 0) {
+          );
+        case 1:
+          return TableViewCell(
+            child: Padding(
+              padding: const EdgeInsets.only(left: paddingLeft),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      columns[vicinity.column],
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF475467),
+                      ),
+                    ),
+                    const Tooltip(
+                      triggerMode: TooltipTriggerMode.tap,
+                      message: "Unique ID on EXPA",
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 5.0),
+                        child: Icon(
+                          Icons.help_outline_rounded,
+                          size: 14,
+                          color: Color(0xFF98A2B3),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          );
+        default:
+          return TableViewCell(
+            child: Padding(
+              padding: const EdgeInsets.only(left: paddingLeft),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  columns[vicinity.column],
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF475467),
+                  ),
+                ),
+              ),
+            ),
+          );
+      }
+    }
+    final String epName = data[vicinity.row]['Full Name'];
+    final String epID = data[vicinity.row]['EP ID'];
+    final String epPhoneNumber = data[vicinity.row]['Phone Number(s)'];
+
+    switch (vicinity.column) {
+      case 0:
         return TableViewCell(
           child: Padding(
             padding: const EdgeInsets.only(left: paddingLeft),
@@ -72,13 +147,8 @@ class EpsTable extends GetView<EpsController> {
                               width: 1.2,
                               color: Color(0xFFD0D5DD),
                             ),
-                            tristate: true,
-                            value: controller.selectedEPsList.isNotEmpty
-                                ? controller.selectedEPsList.length >= data.length - 1
-                                    ? true
-                                    : null
-                                : false,
-                            onChanged: controller.onEpsHeaderCheckboxClick,
+                            value: controller.selectedEPsList.contains(vicinity.row),
+                            onChanged: (value) => {controller.onEpTileSelect(value!, vicinity.row)},
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(6),
                             ),
@@ -86,164 +156,110 @@ class EpsTable extends GetView<EpsController> {
                         ),
                       ),
                     ),
-                  Text(
-                    columns[0],
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF475467),
+                  Flexible(
+                    child: Text(
+                      epName,
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFF101828),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  if (isManagementScreen &&
+                      (controller.departmentEPs[vicinity.row]['Member Name'] as String).isNotEmpty)
+                    Tooltip(
+                      message: controller.departmentEPs[vicinity.row]['Member Name'],
+                      triggerMode: TooltipTriggerMode.tap,
+                      child: const Icon(
+                        Icons.person_rounded,
+                        color: Color(0xFFFBA834),
+                      ),
+                    )
                 ],
               ),
             ),
           ),
         );
-      }
-      return TableViewCell(
-        child: Padding(
-          padding: const EdgeInsets.only(left: paddingLeft),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              columns[vicinity.column],
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF475467),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-    final String epName = data[vicinity.row]['Full Name'];
-    final String epID = data[vicinity.row]['EP ID'];
-    final String epPhoneNumber = data[vicinity.row]['Phone Number(s)'];
-    if (vicinity.column == 2) {
-      return TableViewCell(
-        child: Padding(
-          padding: const EdgeInsets.only(left: paddingLeft),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: GestureDetector(
-              onTap: epPhoneNumber.isEmpty
-                  ? null
-                  : () async {
-                      try {
-                        await launchUrl(Uri(scheme: 'tel', path: epPhoneNumber));
-                      } catch (e) {
-                        Get.log("Phone exception : $e");
-                      }
-                    },
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 8.0),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: const Color(0xFFD0D5DD),
-                    ),
-                    color: Colors.white,
-                    boxShadow: const [
-                      BoxShadow(
-                        blurRadius: 2,
-                        offset: Offset(0, 1),
-                        color: Color(0x1018280D),
-                      )
-                    ]),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.circle,
-                        size: 8, color: epPhoneNumber.isEmpty ? Colors.grey : Colors.green),
-                    Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 6.0),
-                        child: Text(
-                          epPhoneNumber.isNotEmpty ? epPhoneNumber : "Not provided",
-                          style: GoogleFonts.inter(
-                              color: const Color(0xFF344054),
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14),
-                          overflow: TextOverflow.ellipsis,
+      case 2:
+        return TableViewCell(
+          child: Padding(
+            padding: const EdgeInsets.only(left: paddingLeft),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: GestureDetector(
+                onTap: epPhoneNumber.isEmpty
+                    ? null
+                    : () async {
+                        try {
+                          await launchUrl(Uri(scheme: 'tel', path: epPhoneNumber));
+                        } catch (e) {
+                          Get.log("Phone exception : $e");
+                        }
+                      },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 8.0),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: const Color(0xFFD0D5DD),
+                      ),
+                      color: Colors.white,
+                      boxShadow: const [
+                        BoxShadow(
+                          blurRadius: 2,
+                          offset: Offset(0, 1),
+                          color: Color(0x1018280D),
+                        )
+                      ]),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.circle,
+                          size: 8, color: epPhoneNumber.isEmpty ? Colors.grey : Colors.green),
+                      Flexible(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 6.0),
+                          child: Text(
+                            epPhoneNumber.isNotEmpty ? epPhoneNumber : "Not provided",
+                            style: GoogleFonts.inter(
+                                color: const Color(0xFF344054),
+                                fontWeight: FontWeight.w500,
+                                fontSize: 14),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      );
-    }
-    if (vicinity.column == 0) {
-      return TableViewCell(
-        child: Padding(
-          padding: const EdgeInsets.only(left: paddingLeft),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Row(
-              children: [
-                if (isManagementScreen)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 12.0),
-                    child: SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: Obx(
-                        () => Checkbox(
-                          splashRadius: 13,
-                          side: const BorderSide(
-                            width: 1.2,
-                            color: Color(0xFFD0D5DD),
-                          ),
-                          value: controller.selectedEPsList.contains(vicinity.row),
-                          onChanged: (value) => {controller.onEpTileSelect(value!, vicinity.row)},
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                Flexible(
-                  child: Text(
-                    epName,
-                    style: GoogleFonts.inter(
-                      color: const Color(0xFF101828),
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
+        );
+      default:
+        return TableViewCell(
+          child: Padding(
+            padding: const EdgeInsets.only(left: paddingLeft),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                epID.isNotEmpty ? epID : "-",
+                style: GoogleFonts.inter(color: const Color(0xFF475467), fontSize: 14),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
-        ),
-      );
+        );
     }
-    return TableViewCell(
-      child: Padding(
-        padding: const EdgeInsets.only(left: paddingLeft),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            epID.isNotEmpty ? epID : "-",
-            style: GoogleFonts.inter(color: const Color(0xFF475467), fontSize: 14),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ),
-    );
   }
 
   TableSpan? _columnBuilder(int index) {
     double spanExtent = 160;
     switch (index) {
       case 0:
-        spanExtent = 190;
+        spanExtent = isManagementScreen ? 220 : 200;
         break;
       case 1:
         spanExtent = 100;
@@ -285,14 +301,30 @@ class EpsTable extends GetView<EpsController> {
 
   @override
   Widget build(BuildContext context) {
-    return TableView.builder(
-      verticalDetails: ScrollableDetails.vertical(controller: controller.verticalController),
-      columnCount: 3,
-      rowCount:
-          isManagementScreen ? controller.departmentEPs.length : controller.allocatedEPsList.length,
-      columnBuilder: _columnBuilder,
-      rowBuilder: _rowBuilder,
-      cellBuilder: _buildCell,
+    return ScrollbarTheme(
+      data: const ScrollbarThemeData(
+        crossAxisMargin: 4,
+      ),
+      child: Scrollbar(
+        scrollbarOrientation: ScrollbarOrientation.bottom,
+        interactive: true,
+        radius: const Radius.circular(20),
+        thickness: 6.0,
+        trackVisibility: true,
+        thumbVisibility: true,
+        controller: horizontalController,
+        child: TableView.builder(
+          verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+          horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+          columnCount: 3,
+          rowCount: isManagementScreen
+              ? controller.departmentEPs.length
+              : controller.allocatedEPsList.length,
+          columnBuilder: _columnBuilder,
+          rowBuilder: _rowBuilder,
+          cellBuilder: _buildCell,
+        ),
+      ),
     );
   }
 }

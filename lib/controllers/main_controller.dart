@@ -11,10 +11,11 @@ class MainController extends GetxController {
   // Dio instance (for handling network communication)
   static final Dio dio = Dio(
     BaseOptions(
+      baseUrl: "http://192.168.1.11:3000", //Change accordingly
       followRedirects: true,
-      connectTimeout: const Duration(seconds: 55),
-      sendTimeout: const Duration(seconds: 45),
-      receiveTimeout: const Duration(minutes: 1),
+      connectTimeout: const Duration(seconds: 45),
+      sendTimeout: const Duration(seconds: 40),
+      receiveTimeout: const Duration(seconds: 50),
     ),
   );
 

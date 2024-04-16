@@ -34,9 +34,9 @@ class EpsScreen extends GetView<EpsController> {
                       ],
                     ),
                   )
-                : const Column(
+                : Column(
                     children: [
-                      EpsHeader(isManagementScreen: false),
+                      const EpsHeader(isManagementScreen: false),
                       Expanded(
                         child: EpsTable(isManagementScreen: false),
                       )

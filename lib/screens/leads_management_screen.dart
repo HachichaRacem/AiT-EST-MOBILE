@@ -9,8 +9,8 @@ class LeadsManagementScreen extends GetView<EpsController> {
 
   @override
   Widget build(BuildContext context) {
-    return const DecoratedBox(
-      decoration: BoxDecoration(
+    return DecoratedBox(
+      decoration: const BoxDecoration(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(16),
           topRight: Radius.circular(16),
@@ -19,7 +19,7 @@ class LeadsManagementScreen extends GetView<EpsController> {
       ),
       child: Column(
         children: [
-          EpsHeader(isManagementScreen: true),
+          const EpsHeader(isManagementScreen: true),
           Expanded(
             child: EpsTable(isManagementScreen: true),
           ),

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:aiesec_im/controllers/main_controller.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class EpsController extends GetxController {
@@ -12,8 +11,6 @@ class EpsController extends GetxController {
 
   bool epsScreenNeedsUpdate = false;
   List departmentEPs = [0];
-
-  final ScrollController verticalController = ScrollController();
 
 // Called once the screen is building
   @override
@@ -40,8 +37,7 @@ class EpsController extends GetxController {
 
     List allocatedEPs = [0];
 
-    // UPDATE IP ADD WITH ipconfig
-    final response = await MainController.dio.get("http://192.168.1.11:3000/lc_leads/$currentLC");
+    final response = await MainController.dio.get("/lc_leads/$currentLC");
 
     // Reset in case of an update rather than a first call
     if (departmentEPs.length != 1) {
@@ -58,7 +54,6 @@ class EpsController extends GetxController {
         departmentEPs.add(ep);
       }
     }
-    Get.log("${departmentEPs.length}");
     allocatedEPsList.value = allocatedEPs;
   }
 
