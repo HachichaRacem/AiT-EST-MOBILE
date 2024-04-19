@@ -1,4 +1,5 @@
 import 'package:aiesec_im/widgets/ep_profile_arrow.dart';
+import 'package:aiesec_im/widgets/ep_profile_dialogs.dart';
 import 'package:aiesec_im/widgets/ep_profile_info_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -47,6 +48,13 @@ class EpSingleProfileScreen extends StatelessWidget {
   final int lastPageIndex;
   const EpSingleProfileScreen(
       {super.key, required this.epData, required this.pageController, required this.lastPageIndex});
+
+  void _onContactTap() {
+    Get.log("$epData");
+    Get.dialog(UpdateContactedDialog(
+      values: {"contacted": epData['Contacted'], "interested": epData['Interested']},
+    ));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -167,8 +175,9 @@ class EpSingleProfileScreen extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if (epData['Contacted'] == "TRUE")
-                                DecoratedBox(
+                              GestureDetector(
+                                onTap: _onContactTap,
+                                child: DecoratedBox(
                                   decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(16),
                                       border: Border.all(
@@ -181,7 +190,7 @@ class EpSingleProfileScreen extends StatelessWidget {
                                     padding:
                                         const EdgeInsets.symmetric(vertical: 3.0, horizontal: 10.0),
                                     child: Text(
-                                      "Contacted",
+                                      epData['Contacted'] == "TRUE" ? "Contacted" : "Not contacted",
                                       style: GoogleFonts.lato(
                                           fontSize: 14,
                                           color: epData['Contacted'] == "TRUE"
@@ -191,6 +200,7 @@ class EpSingleProfileScreen extends StatelessWidget {
                                     ),
                                   ),
                                 ),
+                              ),
                               Padding(
                                 padding: const EdgeInsets.only(left: 27.0),
                                 child: DecoratedBox(
@@ -253,7 +263,11 @@ class EpSingleProfileScreen extends StatelessWidget {
         Expanded(
           child: Column(
             children: [
-              EpProfileInfoTile(title: "Phone Number: ", value: epData["Phone Number(s)"]),
+              EpProfileInfoTile(
+                  title: "Interested",
+                  value: epData['Interested'] == "TRUE" ? "Interested" : "Not Interested"),
+              EpProfileInfoTile(
+                  title: "Phone Number: ", value: epData["Phone Number(s)"], isPhoneNumber: true),
               EpProfileInfoTile(title: "Email: ", value: epData["Email(s)"]),
               EpProfileInfoTile(title: "Source: ", value: epData["Source"]),
               EpProfileInfoTile(title: "University: ", value: epData["University"], editable: true),

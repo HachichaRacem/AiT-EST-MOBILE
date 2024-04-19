@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class EpsTable extends GetView<EpsController> {
   final bool isManagementScreen;
@@ -13,7 +12,7 @@ class EpsTable extends GetView<EpsController> {
   EpsTable({super.key, required this.isManagementScreen});
 
   TableViewCell _buildCell(BuildContext context, TableVicinity vicinity) {
-    const columns = ["Name", "EP ID", "Phone Number"];
+    const columns = ["Name", "EP ID", "Allocated Member"];
     const double paddingLeft = 24.0;
 
     final data = isManagementScreen ? controller.departmentEPs : controller.allocatedEPsList;
@@ -123,7 +122,7 @@ class EpsTable extends GetView<EpsController> {
     }
     final String epName = data[vicinity.row]['Full Name'];
     final String epID = data[vicinity.row]['EP ID'];
-    final String epPhoneNumber = data[vicinity.row]['Phone Number(s)'];
+    final String epManager = data[vicinity.row]['Member Name'];
 
     switch (vicinity.column) {
       case 0:
@@ -167,16 +166,6 @@ class EpsTable extends GetView<EpsController> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  if (isManagementScreen &&
-                      (controller.departmentEPs[vicinity.row]['Member Name'] as String).isNotEmpty)
-                    Tooltip(
-                      message: controller.departmentEPs[vicinity.row]['Member Name'],
-                      triggerMode: TooltipTriggerMode.tap,
-                      child: const Icon(
-                        Icons.person_rounded,
-                        color: Color(0xFFFBA834),
-                      ),
-                    )
                 ],
               ),
             ),
@@ -188,51 +177,13 @@ class EpsTable extends GetView<EpsController> {
             padding: const EdgeInsets.only(left: paddingLeft),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: GestureDetector(
-                onTap: epPhoneNumber.isEmpty
-                    ? null
-                    : () async {
-                        try {
-                          await launchUrl(Uri(scheme: 'tel', path: epPhoneNumber));
-                        } catch (e) {
-                          Get.log("Phone exception : $e");
-                        }
-                      },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 8.0),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: const Color(0xFFD0D5DD),
-                      ),
-                      color: Colors.white,
-                      boxShadow: const [
-                        BoxShadow(
-                          blurRadius: 2,
-                          offset: Offset(0, 1),
-                          color: Color(0x1018280D),
-                        )
-                      ]),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.circle,
-                          size: 8, color: epPhoneNumber.isEmpty ? Colors.grey : Colors.green),
-                      Flexible(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 6.0),
-                          child: Text(
-                            epPhoneNumber.isNotEmpty ? epPhoneNumber : "Not provided",
-                            style: GoogleFonts.inter(
-                                color: const Color(0xFF344054),
-                                fontWeight: FontWeight.w500,
-                                fontSize: 14),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 6.0),
+                child: Text(
+                  epManager.isNotEmpty ? epManager : "None",
+                  style: GoogleFonts.inter(
+                      color: const Color(0xFF344054), fontWeight: FontWeight.w500, fontSize: 14),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),
