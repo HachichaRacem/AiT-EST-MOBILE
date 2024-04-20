@@ -8,7 +8,6 @@ import 'package:aiesec_im/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:toastification/toastification.dart';
 
@@ -24,7 +23,6 @@ class HomeScreen extends GetView<HomeController> {
         if (Get.nestedKey(0)?.currentState != null) {
           if (Get.nestedKey(0)!.currentState!.canPop()) {
             Get.nestedKey(0)!.currentState!.pop();
-            controller.routesHistory.removeLast();
           } else {
             if (!controller.hasConfirmedExit.value) {
               Toastification().show(
@@ -48,7 +46,7 @@ class HomeScreen extends GetView<HomeController> {
       },
       child: Scaffold(
         key: _scaffoldKey,
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFFEFF5FD),
         drawer: Drawer(
           child: Column(
             children: [
@@ -84,94 +82,76 @@ class HomeScreen extends GetView<HomeController> {
             ],
           ),
         ),
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(80),
-          child: CustomAppBar(
-            firstName: "${controller.user.firstName}",
-            leading: const DrawerButton(
-              style: ButtonStyle(
-                iconColor: MaterialStatePropertyAll(Colors.white),
-              ),
+        body: Column(
+          children: [
+            CustomAppBar(
+              scaffoldKey: _scaffoldKey,
             ),
-            trailing: CircleAvatar(
-              radius: 15,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(40),
-                child: SvgPicture.network(
-                    "https://cdn-expa.aiesec.org/gis-img/missing_profile_${controller.user.fullName![0].toLowerCase()}.svg"),
-              ),
-            ),
-          ),
-        ),
-        body: DecoratedBox(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF387ADF), Color(0xFF50C4ED)],
-            ),
-          ),
-          child: DecoratedBox(
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-              color: Colors.white,
-            ),
-            child: Navigator(
-              observers: [MyObserver()],
-              key: Get.nestedKey(0),
-              initialRoute: '/',
-              onGenerateRoute: (settings) {
-                if (settings.name != null) {
-                  controller.routesHistory.add(settings.name!);
-                }
-                switch (settings.name) {
-                  case '/':
-                    return GetPageRoute(
-                      routeName: '/',
-                      settings: const RouteSettings(name: '/'),
-                      page: () => const EpsScreen(),
-                      binding: BindingsBuilder.put(
-                        () => EpsController(),
-                      ),
-                    );
-                  case '/epProfile':
-                    return GetPageRoute(
-                      routeName: '/epProfile',
-                      settings: const RouteSettings(name: '/epProfile'),
-                      page: () {
-                        final Map<String, dynamic> arguments =
-                            settings.arguments as Map<String, dynamic>;
-                        return EpsProfilesScreen(
-                          data: arguments['data'],
-                          openedEpIndex: arguments['index'],
+            Expanded(
+              child: DecoratedBox(
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                  ),
+                  boxShadow: [
+                    BoxShadow(offset: Offset(0, 1), blurRadius: 2, color: Color(0x1018280D))
+                  ],
+                  color: Colors.white,
+                ),
+                child: Navigator(
+                  observers: [MyObserver()],
+                  key: Get.nestedKey(0),
+                  initialRoute: '/',
+                  onGenerateRoute: (settings) {
+                    switch (settings.name) {
+                      case '/':
+                        return GetPageRoute(
+                          routeName: '/',
+                          settings: const RouteSettings(name: '/'),
+                          page: () => const EpsScreen(),
+                          binding: BindingsBuilder.put(
+                            () => EpsController(),
+                          ),
                         );
-                      },
-                      transition: Transition.downToUp,
-                    );
-                  case '/leadsManagement':
-                    return GetPageRoute(
-                      routeName: '/leadsManagement',
-                      settings: const RouteSettings(name: '/leadsManagement'),
-                      page: () => const LeadsManagementScreen(),
-                      transition: Transition.downToUp,
-                      binding: BindingsBuilder.put(
-                        () => EpsController(),
-                      ),
-                    );
-                  default:
-                    return GetPageRoute(
-                      routeName: '/',
-                      settings: const RouteSettings(name: '/'),
-                      page: () => const EpsScreen(),
-                      binding: BindingsBuilder.put(
-                        () => EpsController(),
-                      ),
-                    );
-                }
-              },
+                      case '/epProfile':
+                        return GetPageRoute(
+                          routeName: '/epProfile',
+                          settings: const RouteSettings(name: '/epProfile'),
+                          page: () {
+                            final Map<String, dynamic> arguments =
+                                settings.arguments as Map<String, dynamic>;
+                            return EpsProfilesScreen(
+                              data: arguments['data'],
+                              openedEpIndex: arguments['index'],
+                            );
+                          },
+                          transition: Transition.downToUp,
+                        );
+                      case '/leadsManagement':
+                        return GetPageRoute(
+                          routeName: '/leadsManagement',
+                          settings: const RouteSettings(name: '/leadsManagement'),
+                          page: () => const LeadsManagementScreen(),
+                          transition: Transition.downToUp,
+                          binding: BindingsBuilder.put(
+                            () => EpsController(),
+                          ),
+                        );
+                      default:
+                        return GetPageRoute(
+                          routeName: '/',
+                          settings: const RouteSettings(name: '/'),
+                          page: () => const EpsScreen(),
+                          binding: BindingsBuilder.put(
+                            () => EpsController(),
+                          ),
+                        );
+                    }
+                  },
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

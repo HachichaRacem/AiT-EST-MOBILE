@@ -1,15 +1,22 @@
 import 'dart:async';
 
 import 'package:aiesec_im/controllers/main_controller.dart';
+import 'package:aiesec_im/utils/exchange_participant.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class EpsController extends GetxController {
   // State managment and other parameters.
   final RxInt currentState = RxInt(0); // 0 - loading, 1 - error, 2 - success
   final RxList allocatedEPsList = RxList([]);
-  final RxList selectedEPsList = RxList([]);
+  final RxList selectedEPsList = RxList([]); // contains ep.id of selected EPs
+
+  final TextEditingController appBarSearchCtrl = TextEditingController();
 
   bool epsScreenNeedsUpdate = false;
+  bool isUserSearching = false;
+
+  List searchedEPs = [0];
   List departmentEPs = [0];
 
 // Called once the screen is building
@@ -21,8 +28,8 @@ class EpsController extends GetxController {
       // In case of update, resets the variable back to false
       epsScreenNeedsUpdate = false;
       currentState.value = 2;
-    } catch (e) {
-      Get.log("[EPs Controller]: $e");
+    } catch (e, stack) {
+      Get.log("[EPs Controller]: $e\n$stack");
       currentState.value = 1;
     }
     super.onReady();
@@ -32,7 +39,7 @@ class EpsController extends GetxController {
   /// then filters the ones allocated to [User] into [allocatedEPsList] with the help of [allocatedEPs]
   Future<void> _fetchAllocatedEPs() async {
     final String currentLC = MainController.user!.lcName!;
-    final String department = MainController.user!.department!.toLowerCase();
+    final String department = MainController.user!.department!;
     final String firstName = MainController.user!.firstName!;
 
     List allocatedEPs = [0];
@@ -43,16 +50,17 @@ class EpsController extends GetxController {
     if (departmentEPs.length != 1) {
       departmentEPs = [0];
     }
-    for (final Map<String, dynamic> ep in response.data) {
-      final String epDepartment = (ep['Allocate the departement'] as String).toLowerCase();
-      final String epManager = ep['Member Name'];
-      if (epManager == firstName) {
+    int id = 0;
+    for (final Map<String, dynamic> epData in response.data) {
+      final ExchangeParticipant ep = ExchangeParticipant.fromJson(epData, id);
+      if (ep.memberName.toLowerCase() == firstName.toLowerCase()) {
         // Later add condition to verify department if its the same
         allocatedEPs.add(ep);
       }
-      if (epDepartment == department) {
+      if (ep.allocatedDepartment.toLowerCase() == department.toLowerCase()) {
         departmentEPs.add(ep);
       }
+      id++;
     }
     allocatedEPsList.value = allocatedEPs;
   }
@@ -63,16 +71,42 @@ class EpsController extends GetxController {
       selectedEPsList.clear();
     } else {
       for (int i = 1; i < departmentEPs.length; i++) {
-        selectedEPsList.addIf(!selectedEPsList.contains(i), i);
+        final ExchangeParticipant ep = departmentEPs[i];
+        selectedEPsList.addIf(!selectedEPsList.contains(ep.id), ep.id);
       }
     }
   }
 
-  void onEpTileSelect(bool value, int index) {
+  void onEpTileSelect(bool value, int id) {
     if (value) {
-      selectedEPsList.add(index);
+      selectedEPsList.add(id);
     } else {
-      selectedEPsList.removeWhere((element) => element == index);
+      selectedEPsList.removeWhere((element) => element == id);
     }
+  }
+
+  void reset() {
+    isUserSearching = false;
+    searchedEPs = [0];
+    selectedEPsList.clear();
+    appBarSearchCtrl.clear();
+    update();
+  }
+
+  void onSearchBarTextChange(String value) {
+    if (value.isNotEmpty) {
+      isUserSearching = true;
+      searchedEPs = [0];
+      for (final ExchangeParticipant ep in departmentEPs.sublist(1)) {
+        if (ep.fullName.toLowerCase().contains(value.toLowerCase())) {
+          searchedEPs.add(ep);
+        }
+      }
+    } else {
+      isUserSearching = false;
+      searchedEPs = [0];
+      Get.log("selected EPs : $selectedEPsList");
+    }
+    update();
   }
 }

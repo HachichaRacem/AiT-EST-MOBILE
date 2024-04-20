@@ -1,4 +1,5 @@
 import 'package:aiesec_im/controllers/main_controller.dart';
+import 'package:aiesec_im/utils/exchange_participant.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -87,19 +88,20 @@ class AssignConfirmDialog extends StatelessWidget {
     final EpsController epController = Get.find();
     const baseURL = "http://192.168.1.11:3000/updateMemberName";
     List<Future> requestsToSend = [];
-    for (final epIndex in epController.selectedEPsList) {
-      final String epID = epController.departmentEPs[epIndex]['EP ID'];
-      if (epID.isNotEmpty) {
-        Get.log("Updating : ${epController.departmentEPs[epIndex]['Full Name']}");
-        Get.log("URL : $baseURL/$epID");
-        requestsToSend.add(MainController.dio
-            .put("$baseURL/$epID", data: {"newMemberName": selectedMember.substring(0, 6)}));
+    for (final epID in epController.selectedEPsList) {
+      final ExchangeParticipant selectedEP = epController.departmentEPs
+          .sublist(1)
+          .singleWhere((element) => (element as ExchangeParticipant).id == epID);
+      if (selectedEP.expaEPID != -1) {
+        Get.log("Updating : ${selectedEP.fullName}");
+        Get.log("URL : $baseURL/${selectedEP.expaEPID}");
+        requestsToSend.add(MainController.dio.put("$baseURL/${selectedEP.expaEPID}",
+            data: {"newMemberName": selectedMember.substring(0, 6)}));
       } else {
-        final String epName = epController.departmentEPs[epIndex]['Full Name'];
         toastification.show(
           context: context,
           title: const Text("Warning"),
-          description: Text("Could not update $epName due to missing ID."),
+          description: Text("Could not update ${selectedEP.fullName} due to missing ID."),
           type: ToastificationType.warning,
           style: ToastificationStyle.minimal,
           autoCloseDuration: const Duration(seconds: 5),

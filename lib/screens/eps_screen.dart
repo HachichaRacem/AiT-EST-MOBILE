@@ -10,39 +10,36 @@ class EpsScreen extends GetView<EpsController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Obx(
-        () => controller.currentState.value == 0
-            ? const Center(child: CircularProgressIndicator(strokeWidth: 1.5))
-            : controller.currentState.value == 1
-                ? Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Something went wrong",
-                          style: GoogleFonts.inter(
-                            color: Get.theme.colorScheme.error,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: controller.onReady,
-                          icon: const Icon(Icons.refresh),
-                          color: Get.theme.colorScheme.error,
-                        )
-                      ],
-                    ),
-                  )
-                : Column(
+    return Obx(
+      () => controller.currentState.value == 0
+          ? const Center(child: CircularProgressIndicator(strokeWidth: 1.5))
+          : controller.currentState.value == 1
+              ? Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const EpsHeader(isManagementScreen: false),
-                      Expanded(
-                        child: EpsTable(isManagementScreen: false),
+                      Text(
+                        "Something went wrong",
+                        style: GoogleFonts.inter(
+                          color: Get.theme.colorScheme.error,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: controller.onReady,
+                        icon: const Icon(Icons.refresh),
+                        color: Get.theme.colorScheme.error,
                       )
                     ],
                   ),
-      ),
+                )
+              : Column(
+                  children: [
+                    const EpsHeader(isManagementScreen: false),
+                    Expanded(
+                      child: EpsTable(isManagementScreen: false),
+                    )
+                  ],
+                ),
     );
   }
 }

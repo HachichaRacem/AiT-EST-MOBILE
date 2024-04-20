@@ -1,3 +1,4 @@
+import 'package:aiesec_im/utils/exchange_participant.dart';
 import 'package:aiesec_im/widgets/ep_profile_arrow.dart';
 import 'package:aiesec_im/widgets/ep_profile_dialogs.dart';
 import 'package:aiesec_im/widgets/ep_profile_info_tile.dart';
@@ -43,7 +44,7 @@ class EpsProfilesScreen extends StatelessWidget {
 }
 
 class EpSingleProfileScreen extends StatelessWidget {
-  final Map epData;
+  final ExchangeParticipant epData;
   final PageController pageController;
   final int lastPageIndex;
   const EpSingleProfileScreen(
@@ -52,7 +53,7 @@ class EpSingleProfileScreen extends StatelessWidget {
   void _onContactTap() {
     Get.log("$epData");
     Get.dialog(UpdateContactedDialog(
-      values: {"contacted": epData['Contacted'], "interested": epData['Interested']},
+      values: {"contacted": epData.isContacted, "interested": epData.isInterested},
     ));
   }
 
@@ -93,7 +94,7 @@ class EpSingleProfileScreen extends StatelessWidget {
                               ),
                               Expanded(
                                 child: Text(
-                                  epData['Full Name'],
+                                  epData.fullName,
                                   style: GoogleFonts.lato(
                                     fontSize: 24,
                                     fontWeight: FontWeight.w700,
@@ -122,7 +123,7 @@ class EpSingleProfileScreen extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                epData['EP ID'],
+                                epData.expaEPID.toString(),
                                 style: GoogleFonts.lato(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
@@ -139,7 +140,7 @@ class EpSingleProfileScreen extends StatelessWidget {
                                       String message = "";
                                       try {
                                         await Clipboard.setData(
-                                            ClipboardData(text: epData['EP ID']));
+                                            ClipboardData(text: "${epData.expaEPID}"));
                                         message = "Copied to clipboard";
                                       } catch (e) {
                                         message = "Could not copy ID";
@@ -175,32 +176,31 @@ class EpSingleProfileScreen extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              GestureDetector(
-                                onTap: _onContactTap,
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(
-                                        color: const Color(
-                                          0xFFD6DFE5,
+                              if (epData.isContacted)
+                                GestureDetector(
+                                  onTap: _onContactTap,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                          color: const Color(
+                                            0xFFD6DFE5,
+                                          ),
                                         ),
+                                        color: const Color(0xFFF3F8FF)),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 3.0, horizontal: 10.0),
+                                      child: Text(
+                                        "Contacted",
+                                        style: GoogleFonts.lato(
+                                            fontSize: 14,
+                                            color: const Color(0xFF387ADF),
+                                            fontWeight: FontWeight.w500),
                                       ),
-                                      color: const Color(0xFFF3F8FF)),
-                                  child: Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 3.0, horizontal: 10.0),
-                                    child: Text(
-                                      epData['Contacted'] == "TRUE" ? "Contacted" : "Not contacted",
-                                      style: GoogleFonts.lato(
-                                          fontSize: 14,
-                                          color: epData['Contacted'] == "TRUE"
-                                              ? const Color(0xFF387ADF)
-                                              : Colors.grey,
-                                          fontWeight: FontWeight.w500),
                                     ),
                                   ),
                                 ),
-                              ),
                               Padding(
                                 padding: const EdgeInsets.only(left: 27.0),
                                 child: DecoratedBox(
@@ -217,9 +217,7 @@ class EpSingleProfileScreen extends StatelessWidget {
                                     padding:
                                         const EdgeInsets.symmetric(vertical: 3.0, horizontal: 10.0),
                                     child: Text(
-                                      epData['Status on expa'] == ""
-                                          ? "Stranger"
-                                          : epData['Status on expa'],
+                                      epData.status,
                                       style: GoogleFonts.lato(
                                           fontSize: 14,
                                           color: const Color(0xFF32D583),
@@ -265,14 +263,14 @@ class EpSingleProfileScreen extends StatelessWidget {
             children: [
               EpProfileInfoTile(
                   title: "Interested",
-                  value: epData['Interested'] == "TRUE" ? "Interested" : "Not Interested"),
+                  value: epData.isInterested ? "Interested" : "Not Interested"),
               EpProfileInfoTile(
-                  title: "Phone Number: ", value: epData["Phone Number(s)"], isPhoneNumber: true),
-              EpProfileInfoTile(title: "Email: ", value: epData["Email(s)"]),
-              EpProfileInfoTile(title: "Source: ", value: epData["Source"]),
-              EpProfileInfoTile(title: "University: ", value: epData["University"], editable: true),
+                  title: "Phone Number: ", value: epData.phoneNumber, isPhoneNumber: true),
+              EpProfileInfoTile(title: "Email: ", value: epData.email),
+              EpProfileInfoTile(title: "Source: ", value: epData.source),
+              EpProfileInfoTile(title: "University: ", value: epData.university, editable: true),
               EpProfileInfoTile(
-                  title: "Field of Study: ", value: epData["Field Of Study"], editable: true),
+                  title: "Field of Study: ", value: epData.fieldOfStudy, editable: true),
             ],
           ),
         )

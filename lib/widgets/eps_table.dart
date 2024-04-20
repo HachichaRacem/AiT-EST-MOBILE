@@ -1,4 +1,6 @@
 import 'package:aiesec_im/controllers/eps_controller.dart';
+import 'package:aiesec_im/utils/exchange_participant.dart';
+import 'package:aiesec_im/widgets/ep_profile_phone_num.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,10 +14,14 @@ class EpsTable extends GetView<EpsController> {
   EpsTable({super.key, required this.isManagementScreen});
 
   TableViewCell _buildCell(BuildContext context, TableVicinity vicinity) {
-    const columns = ["Name", "EP ID", "Allocated Member"];
+    const columns = ["Name", "EP ID", "Allocated Member", "Phone Number"];
     const double paddingLeft = 24.0;
 
-    final data = isManagementScreen ? controller.departmentEPs : controller.allocatedEPsList;
+    final data = controller.isUserSearching
+        ? controller.searchedEPs
+        : isManagementScreen
+            ? controller.departmentEPs
+            : controller.allocatedEPsList;
 
     if (vicinity.row == 0) {
       switch (vicinity.column) {
@@ -77,7 +83,7 @@ class EpsTable extends GetView<EpsController> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      columns[vicinity.column],
+                      columns[1],
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -108,7 +114,7 @@ class EpsTable extends GetView<EpsController> {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  columns[vicinity.column],
+                  columns[isManagementScreen ? 2 : 3],
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
@@ -120,9 +126,7 @@ class EpsTable extends GetView<EpsController> {
           );
       }
     }
-    final String epName = data[vicinity.row]['Full Name'];
-    final String epID = data[vicinity.row]['EP ID'];
-    final String epManager = data[vicinity.row]['Member Name'];
+    final ExchangeParticipant currentEP = data[vicinity.row];
 
     switch (vicinity.column) {
       case 0:
@@ -146,8 +150,12 @@ class EpsTable extends GetView<EpsController> {
                               width: 1.2,
                               color: Color(0xFFD0D5DD),
                             ),
-                            value: controller.selectedEPsList.contains(vicinity.row),
-                            onChanged: (value) => {controller.onEpTileSelect(value!, vicinity.row)},
+                            value: controller.selectedEPsList
+                                .contains((data[vicinity.row] as ExchangeParticipant).id),
+                            onChanged: (value) => {
+                              controller.onEpTileSelect(
+                                  value!, (data[vicinity.row] as ExchangeParticipant).id)
+                            },
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(6),
                             ),
@@ -157,7 +165,7 @@ class EpsTable extends GetView<EpsController> {
                     ),
                   Flexible(
                     child: Text(
-                      epName,
+                      currentEP.fullName,
                       style: GoogleFonts.inter(
                         color: const Color(0xFF101828),
                         fontWeight: FontWeight.w500,
@@ -179,12 +187,16 @@ class EpsTable extends GetView<EpsController> {
               alignment: Alignment.centerLeft,
               child: Padding(
                 padding: const EdgeInsets.only(left: 6.0),
-                child: Text(
-                  epManager.isNotEmpty ? epManager : "None",
-                  style: GoogleFonts.inter(
-                      color: const Color(0xFF344054), fontWeight: FontWeight.w500, fontSize: 14),
-                  overflow: TextOverflow.ellipsis,
-                ),
+                child: isManagementScreen
+                    ? Text(
+                        currentEP.memberName,
+                        style: GoogleFonts.inter(
+                            color: const Color(0xFF344054),
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14),
+                        overflow: TextOverflow.ellipsis,
+                      )
+                    : EpProfilePhone(epPhoneNumber: currentEP.phoneNumber),
               ),
             ),
           ),
@@ -196,7 +208,7 @@ class EpsTable extends GetView<EpsController> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                epID.isNotEmpty ? epID : "-",
+                currentEP.expaEPID == -1 ? "-" : currentEP.expaEPID.toString(),
                 style: GoogleFonts.inter(color: const Color(0xFF475467), fontSize: 14),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -221,7 +233,11 @@ class EpsTable extends GetView<EpsController> {
   }
 
   TableSpan? _rowBuilder(int index) {
-    final data = isManagementScreen ? controller.departmentEPs : controller.allocatedEPsList;
+    final data = controller.isUserSearching
+        ? controller.searchedEPs
+        : isManagementScreen
+            ? controller.departmentEPs
+            : controller.allocatedEPsList;
     return TableSpan(
       extent: FixedTableSpanExtent(index == 0 ? 44 : 70),
       backgroundDecoration: TableSpanDecoration(
@@ -264,16 +280,22 @@ class EpsTable extends GetView<EpsController> {
         trackVisibility: true,
         thumbVisibility: true,
         controller: horizontalController,
-        child: TableView.builder(
-          verticalDetails: ScrollableDetails.vertical(controller: verticalController),
-          horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
-          columnCount: 3,
-          rowCount: isManagementScreen
-              ? controller.departmentEPs.length
-              : controller.allocatedEPsList.length,
-          columnBuilder: _columnBuilder,
-          rowBuilder: _rowBuilder,
-          cellBuilder: _buildCell,
+        child: GetBuilder(
+          init: controller,
+          builder: (value) => TableView.builder(
+            verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+            horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+            columnCount: 3,
+            pinnedRowCount: 1,
+            rowCount: controller.isUserSearching
+                ? controller.searchedEPs.length
+                : isManagementScreen
+                    ? controller.departmentEPs.length
+                    : controller.allocatedEPsList.length,
+            columnBuilder: _columnBuilder,
+            rowBuilder: _rowBuilder,
+            cellBuilder: _buildCell,
+          ),
         ),
       ),
     );
