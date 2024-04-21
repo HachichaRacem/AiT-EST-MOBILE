@@ -4,19 +4,17 @@ import 'package:google_fonts/google_fonts.dart';
 
 class UpdateContactedDialog extends StatelessWidget {
   final Map values;
-  late final RxBool _isContacted = RxBool(values['contacted'] == "TRUE");
-  late final RxBool _isInterested = RxBool(values['interested'] == "TRUE");
 
   final Color _activeTrackColor = const Color(0xFF34C759);
 
-  UpdateContactedDialog({super.key, required this.values});
+  const UpdateContactedDialog({super.key, required this.values});
 
   void _updateIsContactedValue(bool value) {
-    _isContacted.toggle();
+    values['contacted'].value = value;
   }
 
   void _updateIsInterestedValue(bool value) {
-    _isInterested.toggle();
+    values['interested'].value = value;
   }
 
   @override
@@ -53,7 +51,7 @@ class UpdateContactedDialog extends StatelessWidget {
               ),
               Obx(
                 () => Switch(
-                  value: _isContacted.value,
+                  value: values['contacted'].value,
                   onChanged: _updateIsContactedValue,
                   trackOutlineColor: const MaterialStatePropertyAll(Colors.white),
                   activeTrackColor: _activeTrackColor,
@@ -73,7 +71,7 @@ class UpdateContactedDialog extends StatelessWidget {
               ),
               Obx(
                 () => Switch(
-                  value: _isInterested.value,
+                  value: values['interested'].value,
                   onChanged: _updateIsInterestedValue,
                   trackOutlineColor: const MaterialStatePropertyAll(Colors.white),
                   activeTrackColor: _activeTrackColor,

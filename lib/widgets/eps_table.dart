@@ -1,4 +1,5 @@
 import 'package:aiesec_im/controllers/eps_controller.dart';
+import 'package:aiesec_im/controllers/home_controller.dart';
 import 'package:aiesec_im/utils/exchange_participant.dart';
 import 'package:aiesec_im/widgets/ep_profile_phone_num.dart';
 import 'package:flutter/gestures.dart';
@@ -255,11 +256,14 @@ class EpsTable extends GetView<EpsController> {
           ? <Type, GestureRecognizerFactory>{
               TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
                 () => TapGestureRecognizer(),
-                (TapGestureRecognizer t) => t.onTap = () => Get.toNamed(
-                      '/epProfile',
-                      id: 0,
-                      arguments: <String, dynamic>{"data": data.sublist(1), "index": index},
-                    ),
+                (TapGestureRecognizer t) => t.onTap = () {
+                  Get.find<HomeController>().appBarSelectedEP = data[index];
+                  Get.find<HomeController>().appBarType.value = 2;
+                  Get.toNamed(
+                    '/epProfile',
+                    id: 0,
+                  );
+                },
               ),
             }
           : {},
@@ -277,7 +281,6 @@ class EpsTable extends GetView<EpsController> {
         interactive: true,
         radius: const Radius.circular(20),
         thickness: 6.0,
-        trackVisibility: true,
         thumbVisibility: true,
         controller: horizontalController,
         child: GetBuilder(

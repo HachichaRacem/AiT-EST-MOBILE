@@ -1,4 +1,5 @@
 import 'package:aiesec_im/controllers/main_controller.dart';
+import 'package:aiesec_im/utils/exchange_participant.dart';
 import 'package:aiesec_im/utils/user.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -9,7 +10,7 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
 
   // State Management variables
   final RxBool hasConfirmedExit = RxBool(false);
-  final RxInt appBarType = RxInt(0); // 0 - welcome, 1 - leads management
+
   late final AnimationController appBarFadeCtrl = AnimationController(
     vsync: this,
     duration: const Duration(
@@ -18,6 +19,10 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
   );
   late final Animation<double> appBarFadeAnim =
       CurvedAnimation(parent: appBarFadeCtrl, curve: Curves.easeIn);
+
+  // Appbar related states management
+  final RxInt appBarType = RxInt(0); // 0 - welcome, 1 - leads management, 2 - ep profile, 3 - about
+  ExchangeParticipant? appBarSelectedEP;
 
   // Constants needed
   final List<String> months = [

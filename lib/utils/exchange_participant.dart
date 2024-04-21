@@ -1,3 +1,5 @@
+import 'package:get/get.dart';
+
 class ExchangeParticipant {
   late final int id;
   late final String fullName;
@@ -13,8 +15,8 @@ class ExchangeParticipant {
   late final String offlineStatus;
   late final String status;
   late final String cvLink;
-  late final bool isContacted;
-  late final bool isInterested;
+  late final RxBool isContacted;
+  late final RxBool isInterested;
   late final String trackingPhase;
   late final String notes;
   late final String communicationChannel;
@@ -47,8 +49,8 @@ class ExchangeParticipant {
     offlineStatus = data["Status if it's still offline (you can modify this)"];
     status = (data['Status on expa'] as String).isEmpty ? "Stranger" : data['Status on expa'];
     cvLink = data['CV'];
-    isContacted = data['Contacted'] == "TRUE";
-    isInterested = data['Interested'] == "TRUE";
+    isContacted = RxBool(data['Contacted'] == "TRUE");
+    isInterested = RxBool(data['Interested'] == "TRUE");
     trackingPhase = data.containsKey("Tracking Phase") ? data['Tracking Phase'] : "-";
     notes = data.containsKey('Notes') ? data['Notes'] : "-";
     communicationChannel =

@@ -1,279 +1,238 @@
 import 'package:aiesec_im/utils/exchange_participant.dart';
-import 'package:aiesec_im/widgets/ep_profile_arrow.dart';
 import 'package:aiesec_im/widgets/ep_profile_dialogs.dart';
-import 'package:aiesec_im/widgets/ep_profile_info_tile.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:toastification/toastification.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class EpsProfilesScreen extends StatelessWidget {
-  final List data;
-  final int openedEpIndex;
-  late final PageController _controller = PageController(initialPage: openedEpIndex - 1);
-  EpsProfilesScreen({super.key, required this.data, required this.openedEpIndex});
+class EpProfileScreen extends StatelessWidget {
+  final ExchangeParticipant epData;
+  const EpProfileScreen({super.key, required this.epData});
+
+  void _onContactTap() {
+    Get.dialog(
+      UpdateContactedDialog(
+        values: {"contacted": epData.isContacted, "interested": epData.isInterested},
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
-        ),
-        color: Colors.white,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.only(top: 22.0),
-        child: PageView(
-          physics: const NeverScrollableScrollPhysics(),
-          controller: _controller,
-          children: List.generate(
-            data.length,
-            (index) => EpSingleProfileScreen(
-              epData: data[index],
-              pageController: _controller,
-              lastPageIndex: data.length - 1,
+    return ColoredBox(
+      color: const Color(0xFFEFF5FD),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 20, bottom: 16),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Obx(
+                  () => _ProfileChip(
+                    title: "Contacted",
+                    isToAdd: !epData.isContacted.value,
+                    onTap: _onContactTap,
+                    titleColor: const Color(0xFF387ADF),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 27.0),
+                  child: _ProfileChip(
+                    title: epData.status,
+                    titleColor: const Color(0xFF32D583),
+                  ),
+                )
+              ],
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ButtonStyle(
+                      backgroundColor: const MaterialStatePropertyAll(Color(0xFFFBA834)),
+                      surfaceTintColor: const MaterialStatePropertyAll(Color(0xFFFBA834)),
+                      overlayColor: const MaterialStatePropertyAll(Colors.white10),
+                      shape: MaterialStatePropertyAll(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                    child: Text("CV",
+                        style: GoogleFonts.inter(
+                            fontSize: 16, color: Colors.white, fontWeight: FontWeight.w600)),
+                  ),
+                ),
+                const SizedBox(
+                  width: 12,
+                ),
+                Expanded(
+                  child: DecoratedBox(
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(8),
+                      ),
+                      gradient: LinearGradient(
+                        colors: [Color(0xFF387ADF), Color(0xFF50C4ED)],
+                      ),
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      style: ButtonStyle(
+                        shadowColor: const MaterialStatePropertyAll(Colors.transparent),
+                        backgroundColor: const MaterialStatePropertyAll(Colors.transparent),
+                        overlayColor: const MaterialStatePropertyAll(Colors.white10),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        shape: MaterialStatePropertyAll(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        "Notes",
+                        style: GoogleFonts.inter(
+                            fontSize: 16, color: Colors.white, fontWeight: FontWeight.w600),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  DecoratedBox(
+                    decoration:
+                        BoxDecoration(borderRadius: BorderRadius.circular(16), color: Colors.white),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6.0),
+                      child: Column(
+                        children: [
+                          _InfoTile(
+                              title: epData.isInterested.value ? "Interested" : "Not interested"),
+                          _InfoTile(title: epData.phoneNumber, isPhone: true),
+                          _InfoTile(title: epData.email),
+                          _InfoTile(title: epData.source, showDivider: false),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  DecoratedBox(
+                    decoration:
+                        BoxDecoration(borderRadius: BorderRadius.circular(16), color: Colors.white),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6.0),
+                      child: Column(
+                        children: [
+                          _InfoTile(title: epData.university),
+                          _InfoTile(title: epData.field, showDivider: false),
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileChip extends StatelessWidget {
+  final Function()? onTap;
+  final String title;
+  final bool isToAdd;
+  final Color titleColor;
+  const _ProfileChip(
+      {this.onTap, required this.title, this.isToAdd = false, required this.titleColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(
+              0xFFD6DFE5,
+            ),
+          ),
+          color: Colors.white,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 12.0),
+          child: isToAdd == true
+              ? const Icon(Icons.add_rounded, size: 22, color: Colors.grey)
+              : Text(
+                  title,
+                  style: GoogleFonts.lato(
+                      fontSize: 14, color: titleColor, fontWeight: FontWeight.w500),
+                ),
         ),
       ),
     );
   }
 }
 
-class EpSingleProfileScreen extends StatelessWidget {
-  final ExchangeParticipant epData;
-  final PageController pageController;
-  final int lastPageIndex;
-  const EpSingleProfileScreen(
-      {super.key, required this.epData, required this.pageController, required this.lastPageIndex});
+class _InfoTile extends StatelessWidget {
+  final String title;
+  final bool isPhone;
+  final bool showDivider;
 
-  void _onContactTap() {
-    Get.log("$epData");
-    Get.dialog(UpdateContactedDialog(
-      values: {"contacted": epData.isContacted, "interested": epData.isInterested},
-    ));
-  }
+  final _textStyle =
+      GoogleFonts.lato(fontWeight: FontWeight.w700, fontSize: 16, color: const Color(0xFF101828));
+
+  _InfoTile({required this.title, this.isPhone = false, this.showDivider = true});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Stack(
-                children: [
-                  Center(
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 12, right: 12, top: 64),
-                          child: Row(
-                            children: [
-                              EpProfileArrow(
-                                isFlipped: false,
-                                onTap: () {
-                                  final double currentIndex = pageController.page!;
-                                  if (currentIndex == 0.0) {
-                                    pageController.animateToPage(
-                                      lastPageIndex,
-                                      duration: const Duration(milliseconds: 250),
-                                      curve: Curves.easeIn,
-                                    );
-                                  } else {
-                                    pageController.animateToPage(
-                                      (currentIndex - 1).toInt(),
-                                      duration: const Duration(milliseconds: 250),
-                                      curve: Curves.easeIn,
-                                    );
-                                  }
-                                },
-                              ),
-                              Expanded(
-                                child: Text(
-                                  epData.fullName,
-                                  style: GoogleFonts.lato(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF101828),
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              EpProfileArrow(
-                                isFlipped: true,
-                                onTap: () {
-                                  final double currentIndex = pageController.page!;
-                                  pageController.animateToPage(
-                                    (currentIndex + 1).toInt(),
-                                    duration: const Duration(milliseconds: 250),
-                                    curve: Curves.easeIn,
-                                  );
-                                },
-                              )
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8.0, left: 6.0, bottom: 5.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                epData.expaEPID.toString(),
-                                style: GoogleFonts.lato(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: const Color(0xFFFBA834),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 6),
-                                child: SizedBox(
-                                  height: 18,
-                                  width: 18,
-                                  child: IconButton(
-                                    onPressed: () async {
-                                      String message = "";
-                                      try {
-                                        await Clipboard.setData(
-                                            ClipboardData(text: "${epData.expaEPID}"));
-                                        message = "Copied to clipboard";
-                                      } catch (e) {
-                                        message = "Could not copy ID";
-                                      } finally {
-                                        Get.engine.addPostFrameCallback(
-                                          (timeStamp) {
-                                            toastification.show(
-                                              context: context,
-                                              title: Text(message),
-                                              type: ToastificationType.info,
-                                              style: ToastificationStyle.flat,
-                                              closeOnClick: true,
-                                              autoCloseDuration: const Duration(
-                                                seconds: 2,
-                                              ),
-                                            );
-                                          },
-                                        );
-                                      }
-                                    },
-                                    padding: EdgeInsets.zero,
-                                    icon: const Icon(Icons.copy),
-                                    iconSize: 16,
-                                    color: const Color(0xFFFBA834),
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 26, bottom: 41),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (epData.isContacted)
-                                GestureDetector(
-                                  onTap: _onContactTap,
-                                  child: DecoratedBox(
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(
-                                          color: const Color(
-                                            0xFFD6DFE5,
-                                          ),
-                                        ),
-                                        color: const Color(0xFFF3F8FF)),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 3.0, horizontal: 10.0),
-                                      child: Text(
-                                        "Contacted",
-                                        style: GoogleFonts.lato(
-                                            fontSize: 14,
-                                            color: const Color(0xFF387ADF),
-                                            fontWeight: FontWeight.w500),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 27.0),
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: const Color(
-                                        0xFFD6E5DF,
-                                      ),
-                                    ),
-                                    color: const Color(0xFFF1FFF8),
-                                  ),
-                                  child: Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 3.0, horizontal: 10.0),
-                                    child: Text(
-                                      epData.status,
-                                      style: GoogleFonts.lato(
-                                          fontSize: 14,
-                                          color: const Color(0xFF32D583),
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 32),
+          child: isPhone
+              ? GestureDetector(
+                  onTap: title.isEmpty
+                      ? null
+                      : () async {
+                          try {
+                            await launchUrl(Uri(scheme: 'tel', path: title));
+                          } catch (e) {
+                            Get.log("Phone exception : $e");
+                          }
+                        },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.circle,
+                          color: title.isEmpty ? Colors.grey : Colors.green, size: 10),
+                      const SizedBox(width: 8),
+                      Text(title.isEmpty ? "Not provided" : title,
+                          maxLines: 1, overflow: TextOverflow.ellipsis, style: _textStyle)
+                    ],
                   ),
-                  Positioned(
-                    right: 16,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(right: 3),
-                          child: Text(
-                            "CV",
-                            style: GoogleFonts.lato(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFFFBA834),
-                            ),
-                          ),
-                        ),
-                        const Icon(Icons.download_for_offline_rounded,
-                            color: Color(0xFFFBA834), size: 18)
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
-          ],
+                )
+              : Text(title.isEmpty ? "-" : title,
+                  maxLines: 1, overflow: TextOverflow.ellipsis, style: _textStyle),
         ),
-        Expanded(
-          child: Column(
-            children: [
-              EpProfileInfoTile(
-                  title: "Interested",
-                  value: epData.isInterested ? "Interested" : "Not Interested"),
-              EpProfileInfoTile(
-                  title: "Phone Number: ", value: epData.phoneNumber, isPhoneNumber: true),
-              EpProfileInfoTile(title: "Email: ", value: epData.email),
-              EpProfileInfoTile(title: "Source: ", value: epData.source),
-              EpProfileInfoTile(title: "University: ", value: epData.university, editable: true),
-              EpProfileInfoTile(
-                  title: "Field of Study: ", value: epData.fieldOfStudy, editable: true),
-            ],
-          ),
-        )
+        if (showDivider) const Divider()
       ],
     );
   }
