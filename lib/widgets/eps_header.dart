@@ -1,5 +1,6 @@
 import 'package:aiesec_im/controllers/eps_controller.dart';
 import 'package:aiesec_im/widgets/ep_assign_dialogs.dart';
+import 'package:aiesec_im/widgets/ep_filters_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,6 +9,10 @@ class EpsHeader extends GetView<EpsController> {
   final bool isManagementScreen;
   final Color _orangeColor = const Color(0xFFFBA834);
   const EpsHeader({super.key, required this.isManagementScreen});
+
+  void _onFiltersClick() {
+    Get.dialog(const EpsFilterDialog());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,32 +57,13 @@ class EpsHeader extends GetView<EpsController> {
                           onPressed: controller.selectedEPsList.isEmpty
                               ? null
                               : () {
-                                  Get.dialog(const AssignToDialog());
+                                  Get.dialog(AssignToDialog());
                                 },
                           icon: const Icon(
                             Icons.person_add_rounded,
                           ),
                           color: _orangeColor,
                           padding: EdgeInsets.zero,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 2.0),
-                      child: SizedBox(
-                        width: 26,
-                        height: 26,
-                        child: Obx(
-                          () => IconButton(
-                            onPressed: controller.selectedEPsList.isEmpty
-                                ? null
-                                : () => Get.log("Remove pressed"),
-                            icon: const Icon(
-                              Icons.delete_forever_outlined,
-                            ),
-                            color: _orangeColor,
-                            padding: EdgeInsets.zero,
-                          ),
                         ),
                       ),
                     ),
@@ -101,7 +87,7 @@ class EpsHeader extends GetView<EpsController> {
                           icon: const Icon(Icons.tune),
                           color: _orangeColor,
                           iconSize: 18,
-                          onPressed: () {},
+                          onPressed: _onFiltersClick,
                         ),
                       ),
                     )

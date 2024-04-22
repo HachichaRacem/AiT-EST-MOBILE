@@ -110,41 +110,47 @@ class EpProfileScreen extends StatelessWidget {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  DecoratedBox(
-                    decoration:
-                        BoxDecoration(borderRadius: BorderRadius.circular(16), color: Colors.white),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6.0),
-                      child: Column(
-                        children: [
-                          _InfoTile(
-                              title: epData.isInterested.value ? "Interested" : "Not interested"),
-                          _InfoTile(title: epData.phoneNumber, isPhone: true),
-                          _InfoTile(title: epData.email),
-                          _InfoTile(title: epData.source, showDivider: false),
-                        ],
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16), color: Colors.white),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6.0),
+                        child: Column(
+                          children: [
+                            _InfoTile(
+                                title: epData.isInterested.value ? "Interested" : "Not interested"),
+                            _InfoTile(title: epData.phoneNumber, isPhone: true),
+                            _InfoTile(title: epData.email),
+                            _InfoTile(title: epData.source, showDivider: false),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  DecoratedBox(
-                    decoration:
-                        BoxDecoration(borderRadius: BorderRadius.circular(16), color: Colors.white),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6.0),
-                      child: Column(
-                        children: [
-                          _InfoTile(title: epData.university),
-                          _InfoTile(title: epData.field, showDivider: false),
-                        ],
+                    const SizedBox(height: 16),
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16), color: Colors.white),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6.0),
+                        child: Column(
+                          children: [
+                            _InfoTile(
+                              title: "Add Tracking Phase",
+                              titleColor: const Color(0xFF387ADF),
+                            ),
+                            _InfoTile(title: epData.university, editable: true),
+                            _InfoTile(title: epData.field, showDivider: false, editable: true),
+                          ],
+                        ),
                       ),
-                    ),
-                  )
-                ],
+                    )
+                  ],
+                ),
               ),
             ),
           )
@@ -195,11 +201,18 @@ class _InfoTile extends StatelessWidget {
   final String title;
   final bool isPhone;
   final bool showDivider;
+  final Color? titleColor;
+  final bool? editable;
 
-  final _textStyle =
-      GoogleFonts.lato(fontWeight: FontWeight.w700, fontSize: 16, color: const Color(0xFF101828));
+  late final _textStyle = GoogleFonts.lato(
+      fontWeight: FontWeight.w700, fontSize: 16, color: titleColor ?? const Color(0xFF101828));
 
-  _InfoTile({required this.title, this.isPhone = false, this.showDivider = true});
+  _InfoTile(
+      {required this.title,
+      this.isPhone = false,
+      this.showDivider = true,
+      this.titleColor,
+      this.editable});
 
   @override
   Widget build(BuildContext context) {
@@ -229,8 +242,24 @@ class _InfoTile extends StatelessWidget {
                     ],
                   ),
                 )
-              : Text(title.isEmpty ? "-" : title,
-                  maxLines: 1, overflow: TextOverflow.ellipsis, style: _textStyle),
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: Text(title.isEmpty ? "-" : title,
+                          maxLines: 1, overflow: TextOverflow.ellipsis, style: _textStyle),
+                    ),
+                    if (editable == true)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 12.0),
+                        child: Icon(
+                          Icons.edit_rounded,
+                          size: 20,
+                          color: Color(0xFF387ADF),
+                        ),
+                      )
+                  ],
+                ),
         ),
         if (showDivider) const Divider()
       ],

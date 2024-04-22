@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:aiesec_im/controllers/main_controller.dart';
 import 'package:aiesec_im/utils/exchange_participant.dart';
+import 'package:aiesec_im/utils/nav_observer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -10,23 +11,36 @@ class EpsController extends GetxController {
   final RxInt currentState = RxInt(0); // 0 - loading, 1 - error, 2 - success
   final RxList allocatedEPsList = RxList([]);
   final RxList selectedEPsList = RxList([]); // contains ep.id of selected EPs
+  final Rx<bool?> isContactedFilterOn =
+      Rx(null); // null - filters OFF, true - Contacted, false - Not Contacted
 
   final TextEditingController appBarSearchCtrl = TextEditingController();
 
-  bool epsScreenNeedsUpdate = false;
   bool isUserSearching = false;
 
   List searchedEPs = [0];
   List departmentEPs = [0];
 
+  @override
+  void onInit() {
+    isContactedFilterOn.listen((p0) {
+      if (p0 == null) {
+        Get.log("filters off");
+      } else if (p0) {
+        Get.log("filters on : allocted");
+      } else {
+        Get.log("filters on : not allocated");
+      }
+    });
+    super.onInit();
+  }
+
 // Called once the screen is building
   @override
-  void onReady() async {
+  Future<void> onReady() async {
     try {
       currentState.value = 0;
       await _fetchAllocatedEPs();
-      // In case of update, resets the variable back to false
-      epsScreenNeedsUpdate = false;
       currentState.value = 2;
     } catch (e, stack) {
       Get.log("[EPs Controller]: $e\n$stack");
@@ -97,9 +111,17 @@ class EpsController extends GetxController {
     if (value.isNotEmpty) {
       isUserSearching = true;
       searchedEPs = [0];
-      for (final ExchangeParticipant ep in departmentEPs.sublist(1)) {
-        if (ep.fullName.toLowerCase().contains(value.toLowerCase())) {
-          searchedEPs.add(ep);
+      if (MyObserver.history.last == "/crm") {
+        for (final ExchangeParticipant ep in allocatedEPsList.sublist(1)) {
+          if (ep.fullName.toLowerCase().contains(value.toLowerCase())) {
+            searchedEPs.add(ep);
+          }
+        }
+      } else if (MyObserver.history.last == "/leadsManagement") {
+        for (final ExchangeParticipant ep in departmentEPs.sublist(1)) {
+          if (ep.fullName.toLowerCase().contains(value.toLowerCase())) {
+            searchedEPs.add(ep);
+          }
         }
       }
     } else {

@@ -126,8 +126,12 @@ class _FunnelItem extends StatelessWidget {
         ),
         Flexible(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: LinearProgressIndicator(color: color, value: percent),
+            padding: const EdgeInsets.symmetric(horizontal: 30.0),
+            child: LinearProgressIndicator(
+              color: color,
+              value: percent,
+              borderRadius: BorderRadius.circular(20),
+            ),
           ),
         ),
         Text(
@@ -158,14 +162,15 @@ class Tracking extends StatelessWidget {
           style: GoogleFonts.lato(
               color: const Color(0xFFFBA834), fontSize: 16, fontWeight: FontWeight.w600),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 24),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: List.generate(
             data.values.length,
             (index) => Column(children: [
               CircularPercentIndicator(
-                radius: 30,
+                circularStrokeCap: CircularStrokeCap.round,
+                radius: 35,
                 progressColor: colors[index],
                 percent: data.values.elementAt(index) / 100,
                 center: Text("${data.values.elementAt(index).toStringAsFixed(1)} %",
@@ -176,7 +181,7 @@ class Tracking extends StatelessWidget {
                     )),
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 6.0),
+                padding: const EdgeInsets.only(top: 16.0),
                 child: Text(
                   data.keys.elementAt(index),
                   style: GoogleFonts.lato(

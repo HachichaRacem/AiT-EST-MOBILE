@@ -75,27 +75,27 @@ class HomeScreen extends GetView<HomeController> {
                 child: Navigator(
                   observers: [MyObserver()],
                   key: Get.nestedKey(0),
-                  initialRoute: '/statistics',
+                  initialRoute: '/',
                   onGenerateRoute: (settings) {
                     switch (settings.name) {
                       case '/':
                         return GetPageRoute(
                           routeName: '/',
                           settings: const RouteSettings(name: '/'),
+                          page: () => const StatisticsScreen(),
+                          binding: BindingsBuilder.put(
+                            () => StatisticsController(),
+                          ),
+                        );
+                      case '/crm':
+                        return GetPageRoute(
+                          routeName: '/crm',
+                          settings: const RouteSettings(name: '/crm'),
                           page: () => const EpsScreen(),
                           binding: BindingsBuilder.put(
                             () => EpsController(),
                           ),
                           transition: Transition.downToUp,
-                        );
-                      case '/statistics':
-                        return GetPageRoute(
-                          routeName: '/statistics',
-                          settings: const RouteSettings(name: '/statistics'),
-                          page: () => const StatisticsScreen(),
-                          binding: BindingsBuilder.put(
-                            () => StatisticsController(),
-                          ),
                         );
                       case '/epProfile':
                         return GetPageRoute(
@@ -125,8 +125,8 @@ class HomeScreen extends GetView<HomeController> {
                         );
                       default:
                         return GetPageRoute(
-                          routeName: '/statistics',
-                          settings: const RouteSettings(name: '/statistics'),
+                          routeName: '/',
+                          settings: const RouteSettings(name: '/'),
                           page: () => const StatisticsScreen(),
                           binding: BindingsBuilder.put(
                             () => StatisticsController(),

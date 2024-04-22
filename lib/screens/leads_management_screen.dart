@@ -3,6 +3,7 @@ import 'package:aiesec_im/widgets/eps_header.dart';
 import 'package:aiesec_im/widgets/eps_table.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LeadsManagementScreen extends GetView<EpsController> {
   const LeadsManagementScreen({super.key});
@@ -17,13 +18,36 @@ class LeadsManagementScreen extends GetView<EpsController> {
         ),
         color: Colors.white,
       ),
-      child: Column(
-        children: [
-          const EpsHeader(isManagementScreen: true),
-          Expanded(
-            child: EpsTable(isManagementScreen: true),
-          ),
-        ],
+      child: Obx(
+        () => controller.currentState.value == 0
+            ? const Center(child: CircularProgressIndicator(strokeWidth: 1.5))
+            : controller.currentState.value == 1
+                ? Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Something went wrong",
+                          style: GoogleFonts.inter(
+                            color: Get.theme.colorScheme.error,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: controller.onReady,
+                          icon: const Icon(Icons.refresh),
+                          color: Get.theme.colorScheme.error,
+                        )
+                      ],
+                    ),
+                  )
+                : Column(
+                    children: [
+                      const EpsHeader(isManagementScreen: true),
+                      Expanded(
+                        child: EpsTable(isManagementScreen: true),
+                      ),
+                    ],
+                  ),
       ),
     );
   }

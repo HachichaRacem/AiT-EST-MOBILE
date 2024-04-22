@@ -15,28 +15,30 @@ class NavDrawer extends GetView<HomeController> {
       surfaceTintColor: const Color(0xFFEFF5FD),
       child: Column(
         children: [
-          DrawerHeader(
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "${controller.user.fullName}",
-                    style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w500),
-                  ),
-                  Text(
-                    "${controller.user.position} - ${controller.user.department}",
-                    style: GoogleFonts.inter(fontSize: 14),
-                  )
-                ],
+          SizedBox(
+            height: 200,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 16.0),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "${controller.user.fullName}",
+                      style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w500),
+                    ),
+                    Text(
+                      "${controller.user.position} - ${controller.user.department}",
+                      style: GoogleFonts.inter(fontSize: 14),
+                    )
+                  ],
+                ),
               ),
             ),
           ),
           _DrawerTile(_scaffoldKey,
-              leadingIcon: Icons.pie_chart_rounded,
-              title: "Statistics",
-              destination: "/statistics"),
-          _DrawerTile(_scaffoldKey, leadingIcon: Icons.settings, title: "CRM", destination: "/"),
+              leadingIcon: Icons.pie_chart_rounded, title: "Statistics", destination: "/"),
+          _DrawerTile(_scaffoldKey, leadingIcon: Icons.settings, title: "CRM", destination: "/crm"),
           if (controller.user.position == "LCVP" || controller.user.position == "TL")
             _DrawerTile(_scaffoldKey,
                 leadingIcon: Icons.person, title: "Leads", destination: "/leadsManagement"),

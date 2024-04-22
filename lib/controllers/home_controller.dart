@@ -1,3 +1,4 @@
+import 'package:aiesec_im/controllers/eps_controller.dart';
 import 'package:aiesec_im/controllers/main_controller.dart';
 import 'package:aiesec_im/utils/exchange_participant.dart';
 import 'package:aiesec_im/utils/user.dart';
@@ -50,6 +51,7 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
         Future.delayed(const Duration(seconds: 5), () => hasConfirmedExit.value = false);
       }
     });
+    Get.put(EpsController());
     super.onInit();
   }
 
