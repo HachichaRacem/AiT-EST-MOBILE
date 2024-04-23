@@ -8,6 +8,8 @@ environment:
 
 dependencies:
   dio: ^5.4.1
+  fade_shimmer: ^2.2.0
+  fl_chart: ^0.67.0
   flutter:
     sdk: flutter
   flutter_inappwebview: ^6.0.0

@@ -1,6 +1,6 @@
 import 'package:aiesec_im/controllers/eps_controller.dart';
 import 'package:aiesec_im/widgets/ep_assign_dialogs.dart';
-import 'package:aiesec_im/widgets/ep_filters_dialog.dart';
+import 'package:aiesec_im/widgets/ep_filter_dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,8 +10,40 @@ class EpsHeader extends GetView<EpsController> {
   final Color _orangeColor = const Color(0xFFFBA834);
   const EpsHeader({super.key, required this.isManagementScreen});
 
-  void _onFiltersClick() {
-    Get.dialog(const EpsFilterDialog());
+  void _onAllocatedFilterClick() {
+    if (controller.isAllocatedFilterOn.value == null) {
+      Get.dialog<bool>(const AllocatedFilterDialog()).then((value) {
+        if (value == null) {
+          controller.isAllocatedFilterOn.value = null;
+          controller.searchedEPs = [0];
+          controller.isUserSearching = false;
+          controller.update();
+        }
+      });
+    } else {
+      controller.isAllocatedFilterOn.value = null;
+      controller.searchedEPs = [0];
+      controller.isUserSearching = false;
+      controller.update();
+    }
+  }
+
+  void _onContactedFilterClick() {
+    if (controller.isContactedFilterOn.value == null) {
+      Get.dialog<bool>(const ContactedFilterDialog()).then((value) {
+        if (value == null) {
+          controller.isContactedFilterOn.value = null;
+          controller.searchedEPs = [0];
+          controller.isUserSearching = false;
+          controller.update();
+        }
+      });
+    } else {
+      controller.isContactedFilterOn.value = null;
+      controller.searchedEPs = [0];
+      controller.isUserSearching = false;
+      controller.update();
+    }
   }
 
   @override
@@ -49,11 +81,19 @@ class EpsHeader extends GetView<EpsController> {
             mainAxisSize: MainAxisSize.min,
             children: isManagementScreen
                 ? [
+                    Obx(
+                      () => _FilterButton(
+                        color: _orangeColor,
+                        isFilterOn: controller.isAllocatedFilterOn.value != null,
+                        onTap: _onAllocatedFilterClick,
+                      ),
+                    ),
                     SizedBox(
                       width: 30,
                       height: 28,
                       child: Obx(
                         () => IconButton(
+                          iconSize: 20,
                           onPressed: controller.selectedEPsList.isEmpty
                               ? null
                               : () {
@@ -69,32 +109,51 @@ class EpsHeader extends GetView<EpsController> {
                     ),
                   ]
                 : [
-                    Text(
-                      "Add Filter",
-                      style: GoogleFonts.lato(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                    Obx(
+                      () => _FilterButton(
+                        isFilterOn: controller.isContactedFilterOn.value != null,
                         color: _orangeColor,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 4),
-                      child: SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-                          icon: const Icon(Icons.tune),
-                          color: _orangeColor,
-                          iconSize: 18,
-                          onPressed: _onFiltersClick,
-                        ),
+                        onTap: _onContactedFilterClick,
                       ),
                     )
                   ],
           )
         ],
       ),
+    );
+  }
+}
+
+class _FilterButton extends StatelessWidget {
+  final bool isFilterOn;
+  final Function()? onTap;
+  final Color color;
+  const _FilterButton({required this.isFilterOn, this.onTap, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          isFilterOn ? "Filter on" : "Add Filter",
+          style: GoogleFonts.lato(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: color,
+          ),
+        ),
+        SizedBox(
+          height: 28,
+          width: 30,
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            icon: Icon(isFilterOn ? Icons.close_rounded : Icons.tune),
+            color: isFilterOn ? const Color(0xFF667085) : color,
+            iconSize: 18,
+            onPressed: onTap,
+          ),
+        ),
+      ],
     );
   }
 }

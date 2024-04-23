@@ -12,7 +12,11 @@ class EpProfileScreen extends StatelessWidget {
   void _onContactTap() {
     Get.dialog(
       UpdateContactedDialog(
-        values: {"contacted": epData.isContacted, "interested": epData.isInterested},
+        values: {
+          "contacted": epData.isContacted,
+          "interested": epData.isInterested,
+          "epID": epData.expaEPID
+        },
       ),
     );
   }
@@ -83,7 +87,9 @@ class EpProfileScreen extends StatelessWidget {
                       ),
                     ),
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () => Get.dialog(UpdateNotesDialog(
+                        ep: epData,
+                      )),
                       style: ButtonStyle(
                         shadowColor: const MaterialStatePropertyAll(Colors.transparent),
                         backgroundColor: const MaterialStatePropertyAll(Colors.transparent),
@@ -122,8 +128,9 @@ class EpProfileScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 6.0),
                         child: Column(
                           children: [
-                            _InfoTile(
-                                title: epData.isInterested.value ? "Interested" : "Not interested"),
+                            Obx(() => _InfoTile(
+                                title:
+                                    epData.isInterested.value ? "Interested" : "Not interested")),
                             _InfoTile(title: epData.phoneNumber, isPhone: true),
                             _InfoTile(title: epData.email),
                             _InfoTile(title: epData.source, showDivider: false),
@@ -139,12 +146,34 @@ class EpProfileScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 6.0),
                         child: Column(
                           children: [
-                            _InfoTile(
-                              title: "Add Tracking Phase",
-                              titleColor: const Color(0xFF387ADF),
+                            Obx(
+                              () => _InfoTile(
+                                title: epData.trackingPhase.isEmpty
+                                    ? "Add Tracking Phase"
+                                    : epData.trackingPhase.value,
+                                titleColor:
+                                    epData.trackingPhase.isEmpty ? const Color(0xFF387ADF) : null,
+                                editable: true,
+                                onEditTap: () => Get.dialog(UpdateTrackingPhaseDialog(ep: epData)),
+                              ),
                             ),
-                            _InfoTile(title: epData.university, editable: true),
-                            _InfoTile(title: epData.field, showDivider: false, editable: true),
+                            Obx(() => _InfoTile(
+                                  title: epData.university.value,
+                                  editable: true,
+                                  onEditTap: () => Get.dialog(
+                                    UpdateUniversityDialog(ep: epData),
+                                  ),
+                                )),
+                            Obx(
+                              () => _InfoTile(
+                                title: epData.field.value,
+                                showDivider: false,
+                                editable: true,
+                                onEditTap: () => Get.dialog(
+                                  UpdateFieldDialog(ep: epData),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -203,6 +232,7 @@ class _InfoTile extends StatelessWidget {
   final bool showDivider;
   final Color? titleColor;
   final bool? editable;
+  final Function()? onEditTap;
 
   late final _textStyle = GoogleFonts.lato(
       fontWeight: FontWeight.w700, fontSize: 16, color: titleColor ?? const Color(0xFF101828));
@@ -212,7 +242,8 @@ class _InfoTile extends StatelessWidget {
       this.isPhone = false,
       this.showDivider = true,
       this.titleColor,
-      this.editable});
+      this.editable,
+      this.onEditTap});
 
   @override
   Widget build(BuildContext context) {
@@ -250,12 +281,21 @@ class _InfoTile extends StatelessWidget {
                           maxLines: 1, overflow: TextOverflow.ellipsis, style: _textStyle),
                     ),
                     if (editable == true)
-                      const Padding(
-                        padding: EdgeInsets.only(left: 12.0),
-                        child: Icon(
-                          Icons.edit_rounded,
-                          size: 20,
-                          color: Color(0xFF387ADF),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 12.0),
+                        child: SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            onPressed: onEditTap,
+                            highlightColor: const Color(0xFF387ADF).withAlpha(20),
+                            icon: const Icon(
+                              Icons.edit_rounded,
+                              size: 20,
+                              color: Color(0xFF387ADF),
+                            ),
+                          ),
                         ),
                       )
                   ],

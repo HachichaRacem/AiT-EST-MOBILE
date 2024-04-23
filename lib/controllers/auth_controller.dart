@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:aiesec_im/controllers/main_controller.dart';
 import 'package:aiesec_im/utils/exception.dart';
 import 'package:aiesec_im/utils/user.dart';
+import 'package:aiesec_im/widgets/debug_dialog.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
@@ -25,6 +26,7 @@ class AuthController extends GetxController {
   void onReady() async {
     try {
       await _authenticateUser();
+      await Get.dialog(DebugDialog(), barrierDismissible: false);
       Get.offAllNamed('/home');
     } on NoAccountException {
       sendToEXPA.value = true;

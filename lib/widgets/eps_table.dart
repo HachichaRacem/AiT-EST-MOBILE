@@ -18,11 +18,19 @@ class EpsTable extends GetView<EpsController> {
     const columns = ["Name", "EP ID", "Allocated Member", "Phone Number"];
     const double paddingLeft = 24.0;
 
+    // isUsersearching gets back to being the first "global" one checked, then if it's true
+    // check if the data is filtered, else show searched EPs
+    // then second global one is isDatafiltered and so on...
+
     final data = controller.isUserSearching
         ? controller.searchedEPs
-        : isManagementScreen
-            ? controller.departmentEPs
-            : controller.allocatedEPsList;
+        : controller.isDataFiltered
+            ? controller.isUserSearching
+                ? controller.searchedEPs
+                : controller.filteredEPs
+            : isManagementScreen
+                ? controller.departmentEPs
+                : controller.allocatedEPsList;
 
     if (vicinity.row == 0) {
       switch (vicinity.column) {
@@ -236,9 +244,13 @@ class EpsTable extends GetView<EpsController> {
   TableSpan? _rowBuilder(int index) {
     final data = controller.isUserSearching
         ? controller.searchedEPs
-        : isManagementScreen
-            ? controller.departmentEPs
-            : controller.allocatedEPsList;
+        : controller.isDataFiltered
+            ? controller.isUserSearching
+                ? controller.searchedEPs
+                : controller.filteredEPs
+            : isManagementScreen
+                ? controller.departmentEPs
+                : controller.allocatedEPsList;
     return TableSpan(
       extent: FixedTableSpanExtent(index == 0 ? 44 : 70),
       backgroundDecoration: TableSpanDecoration(
@@ -292,9 +304,13 @@ class EpsTable extends GetView<EpsController> {
             pinnedRowCount: 1,
             rowCount: controller.isUserSearching
                 ? controller.searchedEPs.length
-                : isManagementScreen
-                    ? controller.departmentEPs.length
-                    : controller.allocatedEPsList.length,
+                : controller.isDataFiltered
+                    ? controller.isUserSearching
+                        ? controller.searchedEPs.length
+                        : controller.filteredEPs.length
+                    : isManagementScreen
+                        ? controller.departmentEPs.length
+                        : controller.allocatedEPsList.length,
             columnBuilder: _columnBuilder,
             rowBuilder: _rowBuilder,
             cellBuilder: _buildCell,

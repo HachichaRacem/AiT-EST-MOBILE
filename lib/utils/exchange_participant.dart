@@ -6,7 +6,7 @@ class ExchangeParticipant {
   late final String source;
   late final String email;
   late final String phoneNumber;
-  late final String university;
+  late final RxString university;
   late final String fieldOfStudy;
   late final String dateOfBirth;
   late final int expaEPID;
@@ -17,11 +17,11 @@ class ExchangeParticipant {
   late final String cvLink;
   late final RxBool isContacted;
   late final RxBool isInterested;
-  late final String trackingPhase;
-  late final String notes;
+  late final RxString trackingPhase;
+  late String notes;
   late final String communicationChannel;
   late final String product;
-  late final String field;
+  late final RxString field;
   late final String availability;
 
   ExchangeParticipant.fromJson(Map data, this.id) {
@@ -29,7 +29,7 @@ class ExchangeParticipant {
     source = data['Source'];
     email = data['Email(s)'];
     phoneNumber = data['Phone Number(s)'];
-    university = data['University'];
+    university = RxString(data['University'] == "-" ? "" : data['University']);
     fieldOfStudy = data['Field Of Study'];
     dateOfBirth = data['DOB'];
 
@@ -51,8 +51,17 @@ class ExchangeParticipant {
     cvLink = data['CV'];
     isContacted = RxBool(data['Contacted'] == "TRUE");
     isInterested = RxBool(data['Interested'] == "TRUE");
-    trackingPhase = data.containsKey("Tracking Phase") ? data['Tracking Phase'] : "-";
-    notes = data.containsKey('Notes') ? data['Notes'] : "-";
+    if (data.containsKey("Tracking Phase")) {
+      final String epPhase = data['Tracking Phase'];
+      if (!epPhase.contains("AIESEC") && !epPhase.contains("CV")) {
+        trackingPhase = RxString(epPhase.capitalizeFirst!);
+      } else {
+        trackingPhase = RxString(data['Tracking Phase']);
+      }
+    } else {
+      trackingPhase = RxString("");
+    }
+    notes = data.containsKey('Notes') ? data['Notes'] : "";
     communicationChannel =
         data.containsKey('Communication channel') ? data['Communication channel'] : "-";
     if (data.containsKey("Product")) {
@@ -60,7 +69,7 @@ class ExchangeParticipant {
     } else {
       product = "-";
     }
-    field = data.containsKey("Sub-Product") ? data['Sub-Product'] : "-";
+    field = RxString(data.containsKey("Sub-Product") ? data['Sub-Product'] : "");
     availability = data.containsKey("Availability") ? data['Availability'] : "-";
   }
 }

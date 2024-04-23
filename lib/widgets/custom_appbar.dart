@@ -23,14 +23,6 @@ class CustomAppBar extends GetView<HomeController> {
             controller.appBarType.value == 2 ? Icons.arrow_back_rounded : Icons.menu;
 
         late final String title;
-
-        /*
-          controller.appBarType.value == 0
-                                  ? "Welcome, ${controller.user.firstName}"
-                                  : controller.appBarType.value == 2
-                                      ? "${controller.appBarSelectedEP?.fullName}"
-                                      : "Time to manage your EPs !"
-        */
         switch (controller.appBarType.value) {
           case 0:
             title = "Welcome, ${controller.user.firstName}";

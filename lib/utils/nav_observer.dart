@@ -11,25 +11,24 @@ class MyObserver extends NavigatorObserver {
   void didPush(Route route, Route? previousRoute) {
     if (route.settings.name != null) {
       history.add(route.settings.name!);
-      final controller = Get.find<HomeController>();
+      final homeController = Get.find<HomeController>();
       if (route.settings.name == "/leadsManagement") {
-        Get.engine.addPostFrameCallback((timeStamp) {
-          controller.appBarType.value = 1;
-          controller.appBarType.refresh();
-          controller.appBarFadeCtrl.forward(from: 0);
-        });
+        Get.find<EpsController>().reset();
+        homeController.appBarType.value = 1;
+        homeController.appBarType.refresh();
+        homeController.appBarFadeCtrl.forward(from: 0);
       } else if (route.settings.name == "/crm") {
-        controller.appBarType.value = 1;
-        controller.appBarType.refresh();
-        controller.appBarFadeCtrl.forward(from: 0);
+        homeController.appBarType.value = 1;
+        homeController.appBarType.refresh();
+        homeController.appBarFadeCtrl.forward(from: 0);
       } else if (route.settings.name == "/epProfile") {
-        controller.appBarType.value = 2;
-        controller.appBarType.refresh();
-        controller.appBarFadeCtrl.forward(from: 0);
+        homeController.appBarType.value = 2;
+        homeController.appBarType.refresh();
+        homeController.appBarFadeCtrl.forward(from: 0);
       } else if (route.settings.name == "/about") {
-        controller.appBarType.value = 3;
-        controller.appBarType.refresh();
-        controller.appBarFadeCtrl.forward(from: 0);
+        homeController.appBarType.value = 3;
+        homeController.appBarType.refresh();
+        homeController.appBarFadeCtrl.forward(from: 0);
       }
       Get.log("[$_tag]: Pushed ${route.settings.name} -> $history");
     }
@@ -39,30 +38,30 @@ class MyObserver extends NavigatorObserver {
   @override
   void didPop(Route route, Route? previousRoute) {
     if (route.settings.name != null) {
-      Get.log("[$_tag]: Popped ${route.settings.name} -> $history");
       history.removeLast();
-      final controller = Get.find<HomeController>();
+      final homeController = Get.find<HomeController>();
       if (previousRoute?.settings.name == "/crm") {
-        controller.appBarType.value = 1;
-        controller.appBarType.refresh();
-        controller.appBarFadeCtrl.forward(from: 0);
+        homeController.appBarType.value = 1;
+        homeController.appBarType.refresh();
+        homeController.appBarFadeCtrl.forward(from: 0);
       } else if (previousRoute?.settings.name == "/") {
-        controller.appBarType.value = 0;
-        controller.appBarType.refresh();
-        controller.appBarFadeCtrl.forward(from: 0);
+        homeController.appBarType.value = 0;
+        homeController.appBarType.refresh();
+        homeController.appBarFadeCtrl.forward(from: 0);
       } else if (previousRoute?.settings.name == "/leadsManagement") {
-        controller.appBarType.value = 1;
-        controller.appBarType.refresh();
-        controller.appBarFadeCtrl.forward(from: 0);
+        homeController.appBarType.value = 1;
+        homeController.appBarType.refresh();
+        homeController.appBarFadeCtrl.forward(from: 0);
       } else if (previousRoute?.settings.name == "/about") {
-        controller.appBarType.value = 3;
-        controller.appBarType.refresh();
-        controller.appBarFadeCtrl.forward(from: 0);
+        homeController.appBarType.value = 3;
+        homeController.appBarType.refresh();
+        homeController.appBarFadeCtrl.forward(from: 0);
       }
       if (route.settings.name == "/leadsManagement") {
         Get.find<EpsController>().reset();
       }
     }
+    Get.log("[$_tag]: Popped ${route.settings.name} -> $history");
     super.didPop(route, previousRoute);
   }
 }

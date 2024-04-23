@@ -82,6 +82,7 @@ class MainController extends GetxController {
               ),
             );
             handler.next(error);
+            return;
           } else if (error.type == DioExceptionType.receiveTimeout) {
             Get.showSnackbar(
               GetSnackBar(
@@ -93,6 +94,7 @@ class MainController extends GetxController {
               ),
             );
             handler.next(error);
+            return;
           } else if (error.type == DioExceptionType.sendTimeout) {
             Get.showSnackbar(
               GetSnackBar(
@@ -104,6 +106,7 @@ class MainController extends GetxController {
               ),
             );
             handler.next(error);
+            return;
           } else if (error.type == DioExceptionType.connectionError) {
             Get.showSnackbar(
               GetSnackBar(
@@ -115,14 +118,17 @@ class MainController extends GetxController {
               ),
             );
             handler.next(error);
+            return;
           } else if (error.response != null) {
             if (error.response?.statusCode == 401 &&
                 error.response?.statusMessage == 'Unauthorized') {
               if (error.requestOptions.uri.authority == 'auth.aiesec.org') {
                 handler.reject(error);
+                return;
               } else {
                 try {
                   await _refreshToken(error, handler);
+                  return;
                 } catch (e) {
                   Get.showSnackbar(
                     GetSnackBar(
@@ -153,6 +159,7 @@ class MainController extends GetxController {
               ),
             );
           }
+          handler.next(error);
         },
       ),
     );

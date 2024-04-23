@@ -11,26 +11,76 @@ class EpsController extends GetxController {
   final RxInt currentState = RxInt(0); // 0 - loading, 1 - error, 2 - success
   final RxList allocatedEPsList = RxList([]);
   final RxList selectedEPsList = RxList([]); // contains ep.id of selected EPs
-  final Rx<bool?> isContactedFilterOn =
-      Rx(null); // null - filters OFF, true - Contacted, false - Not Contacted
+
+  // null - filters OFF, true - filters on : first value, false - filters on : second value
+  final Rx<bool?> isContactedFilterOn = Rx(null);
+  final Rx<bool?> isAllocatedFilterOn = Rx(null);
 
   final TextEditingController appBarSearchCtrl = TextEditingController();
 
   bool isUserSearching = false;
+  bool isDataFiltered = false;
 
+  List filteredEPs = [0];
   List searchedEPs = [0];
   List departmentEPs = [0];
 
   @override
   void onInit() {
     isContactedFilterOn.listen((p0) {
-      if (p0 == null) {
-        Get.log("filters off");
-      } else if (p0) {
-        Get.log("filters on : allocted");
-      } else {
-        Get.log("filters on : not allocated");
+      filteredEPs = [0];
+      switch (p0) {
+        case null:
+          isDataFiltered = false;
+          break;
+        case true:
+          isDataFiltered = true;
+          for (final ExchangeParticipant ep
+              in isUserSearching ? searchedEPs.sublist(1) : allocatedEPsList.sublist(1)) {
+            if (ep.isContacted.value) {
+              filteredEPs.add(ep);
+            }
+          }
+
+          break;
+        case false:
+          isDataFiltered = true;
+          for (final ExchangeParticipant ep
+              in isUserSearching ? searchedEPs.sublist(1) : allocatedEPsList.sublist(1)) {
+            if (!ep.isContacted.value) {
+              filteredEPs.add(ep);
+            }
+          }
+          break;
       }
+      update();
+    });
+    isAllocatedFilterOn.listen((p0) {
+      filteredEPs = [0];
+      switch (p0) {
+        case null:
+          isDataFiltered = false;
+          break;
+        case true:
+          isDataFiltered = true;
+          for (final ExchangeParticipant ep
+              in isUserSearching ? searchedEPs.sublist(1) : departmentEPs.sublist(1)) {
+            if (ep.memberName != "None") {
+              filteredEPs.add(ep);
+            }
+          }
+          break;
+        case false:
+          isDataFiltered = true;
+          for (final ExchangeParticipant ep
+              in isUserSearching ? searchedEPs.sublist(1) : departmentEPs.sublist(1)) {
+            if (ep.memberName == "None") {
+              filteredEPs.add(ep);
+            }
+          }
+          break;
+      }
+      update();
     });
     super.onInit();
   }
@@ -101,6 +151,10 @@ class EpsController extends GetxController {
 
   void reset() {
     isUserSearching = false;
+    isDataFiltered = false;
+    isAllocatedFilterOn.value = null;
+    isContactedFilterOn.value = null;
+    filteredEPs = [0];
     searchedEPs = [0];
     selectedEPsList.clear();
     appBarSearchCtrl.clear();
@@ -108,17 +162,19 @@ class EpsController extends GetxController {
   }
 
   void onSearchBarTextChange(String value) {
+    searchedEPs = [0];
     if (value.isNotEmpty) {
       isUserSearching = true;
-      searchedEPs = [0];
       if (MyObserver.history.last == "/crm") {
-        for (final ExchangeParticipant ep in allocatedEPsList.sublist(1)) {
+        for (final ExchangeParticipant ep
+            in isDataFiltered ? filteredEPs.sublist(1) : allocatedEPsList.sublist(1)) {
           if (ep.fullName.toLowerCase().contains(value.toLowerCase())) {
             searchedEPs.add(ep);
           }
         }
       } else if (MyObserver.history.last == "/leadsManagement") {
-        for (final ExchangeParticipant ep in departmentEPs.sublist(1)) {
+        for (final ExchangeParticipant ep
+            in isDataFiltered ? filteredEPs.sublist(1) : departmentEPs.sublist(1)) {
           if (ep.fullName.toLowerCase().contains(value.toLowerCase())) {
             searchedEPs.add(ep);
           }
@@ -126,8 +182,6 @@ class EpsController extends GetxController {
       }
     } else {
       isUserSearching = false;
-      searchedEPs = [0];
-      Get.log("selected EPs : $selectedEPsList");
     }
     update();
   }

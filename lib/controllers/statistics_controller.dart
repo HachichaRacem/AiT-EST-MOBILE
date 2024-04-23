@@ -8,6 +8,7 @@ class StatisticsController extends GetxController {
   @override
   void onReady() async {
     try {
+      currentState.value = 0;
       await _loadData();
       currentState.value = 2;
     } catch (e) {
