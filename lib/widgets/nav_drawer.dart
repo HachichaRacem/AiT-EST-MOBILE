@@ -28,7 +28,7 @@ class NavDrawer extends GetView<HomeController> {
                       style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w500),
                     ),
                     Text(
-                      "${controller.user.position} - ${controller.user.department}",
+                      "${controller.user.position} ${controller.user.department != null ? "- ${controller.user.department}" : ""}",
                       style: GoogleFonts.inter(fontSize: 14),
                     )
                   ],
@@ -39,7 +39,9 @@ class NavDrawer extends GetView<HomeController> {
           _DrawerTile(_scaffoldKey,
               leadingIcon: Icons.pie_chart_rounded, title: "Statistics", destination: "/"),
           _DrawerTile(_scaffoldKey, leadingIcon: Icons.settings, title: "CRM", destination: "/crm"),
-          if (controller.user.position == "LCVP" || controller.user.position == "TL")
+          if (controller.user.position == "LCVP" ||
+              controller.user.position == "TL" ||
+              controller.user.isMC)
             _DrawerTile(_scaffoldKey,
                 leadingIcon: Icons.person, title: "Leads", destination: "/leadsManagement"),
           _DrawerTile(_scaffoldKey,

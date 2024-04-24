@@ -153,7 +153,8 @@ class EpProfileScreen extends StatelessWidget {
                                     : epData.trackingPhase.value,
                                 titleColor:
                                     epData.trackingPhase.isEmpty ? const Color(0xFF387ADF) : null,
-                                editable: true,
+                                editable: epData.trackingPhase.isNotEmpty,
+                                clickable: epData.trackingPhase.isEmpty,
                                 onEditTap: () => Get.dialog(UpdateTrackingPhaseDialog(ep: epData)),
                               ),
                             ),
@@ -232,6 +233,7 @@ class _InfoTile extends StatelessWidget {
   final bool showDivider;
   final Color? titleColor;
   final bool? editable;
+  final bool clickable;
   final Function()? onEditTap;
 
   late final _textStyle = GoogleFonts.lato(
@@ -243,7 +245,8 @@ class _InfoTile extends StatelessWidget {
       this.showDivider = true,
       this.titleColor,
       this.editable,
-      this.onEditTap});
+      this.onEditTap,
+      this.clickable = false});
 
   @override
   Widget build(BuildContext context) {
@@ -277,8 +280,11 @@ class _InfoTile extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Flexible(
-                      child: Text(title.isEmpty ? "-" : title,
-                          maxLines: 1, overflow: TextOverflow.ellipsis, style: _textStyle),
+                      child: GestureDetector(
+                        onTap: clickable ? onEditTap : null,
+                        child: Text(title.isEmpty ? "-" : title,
+                            maxLines: 1, overflow: TextOverflow.ellipsis, style: _textStyle),
+                      ),
                     ),
                     if (editable == true)
                       Padding(

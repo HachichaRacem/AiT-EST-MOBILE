@@ -16,9 +16,7 @@ class CustomAppBar extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Obx(
       () {
-        final EdgeInsets containerMargin =
-            EdgeInsets.fromLTRB(8, 40, 8, controller.appBarType.value == 2 ? 0 : 13);
-        final double containerHeight = controller.appBarType.value != 1 ? 75 : 95;
+        final double containerHeight = controller.appBarType.value != 1 ? 67 : 87;
         final IconData leadingIcon =
             controller.appBarType.value == 2 ? Icons.arrow_back_rounded : Icons.menu;
 
@@ -38,148 +36,152 @@ class CustomAppBar extends GetView<HomeController> {
             break;
         }
 
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          margin: containerMargin,
-          height: containerHeight,
-          decoration: const BoxDecoration(
-              borderRadius: BorderRadius.all(
-                Radius.circular(12),
-              ),
-              color: Colors.white),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                height: 26,
-                width: 26,
-                child: IconButton(
-                  padding: EdgeInsets.zero,
-                  splashColor: Colors.white,
-                  highlightColor: Colors.grey[100],
-                  onPressed: () {
-                    if (controller.appBarType.value == 2) {
-                      Get.back(id: 0);
-                    } else {
-                      scaffoldKey.currentState!.openDrawer();
-                    }
-                  },
-                  icon: GradientIcon(
-                    size: 26,
-                    offset: Offset.zero,
-                    icon: leadingIcon,
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF387ADF),
-                        Color(0xFF50C4ED),
-                      ],
-                    ),
-                  ),
+        return Padding(
+          padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + 8.0, bottom: 8.0, left: 8, right: 8),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            height: containerHeight,
+            decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(12),
                 ),
-              ),
-              Expanded(
-                child: Center(
-                  child: Obx(
-                    () => FadeTransition(
-                      opacity: controller.appBarFadeAnim,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Padding(
-                            padding:
-                                EdgeInsets.only(top: controller.appBarType.value == 1 ? 6.0 : 0.0),
-                            child: Text(
-                              title,
-                              style: GoogleFonts.lato(
-                                  color: const Color(0xFF101828),
-                                  fontSize: controller.appBarType.value != 1 ? 20 : 16,
-                                  fontWeight: FontWeight.w700),
-                            ),
-                          ),
-                          if (controller.appBarType.value == 0)
-                            Text(
-                              "Visualize your statistics below!",
-                              style: GoogleFonts.lato(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFFA6A6A6),
-                              ),
-                            ),
-                          if (controller.appBarType.value == 1)
-                            const Padding(
-                              padding: EdgeInsets.only(top: 8.0),
-                              child: _SearchBar(),
-                            ),
-                          if (controller.appBarType.value == 2)
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  "EP ID: ${controller.appBarSelectedEP?.expaEPID == -1 ? "-" : controller.appBarSelectedEP?.expaEPID}",
-                                  style: GoogleFonts.lato(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: const Color(0xFFA6A6A6),
-                                  ),
-                                ),
-                                if (controller.appBarSelectedEP?.expaEPID != -1)
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 6.0),
-                                    child: SizedBox(
-                                      height: 24,
-                                      width: 24,
-                                      child: IconButton(
-                                        onPressed: () async {
-                                          String message = "";
-                                          try {
-                                            await Clipboard.setData(ClipboardData(
-                                                text: "${controller.appBarSelectedEP?.expaEPID}"));
-                                            message = "Copied to clipboard";
-                                          } catch (e) {
-                                            message = "Could not copy ID";
-                                          } finally {
-                                            Get.engine.addPostFrameCallback(
-                                              (timeStamp) {
-                                                toastification.show(
-                                                  context: context,
-                                                  title: Text(message),
-                                                  type: ToastificationType.info,
-                                                  style: ToastificationStyle.flat,
-                                                  closeOnClick: true,
-                                                  autoCloseDuration: const Duration(
-                                                    seconds: 2,
-                                                  ),
-                                                );
-                                              },
-                                            );
-                                          }
-                                        },
-                                        iconSize: 16,
-                                        icon: const Icon(
-                                          Icons.file_copy,
-                                        ),
-                                        padding: EdgeInsets.zero,
-                                        color: const Color(0xFFFBA834),
-                                      ),
-                                    ),
-                                  )
-                              ],
-                            )
+                color: Colors.white),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: 26,
+                  width: 26,
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    splashColor: Colors.white,
+                    highlightColor: Colors.grey[100],
+                    onPressed: () {
+                      if (controller.appBarType.value == 2) {
+                        Get.back(id: 0);
+                      } else {
+                        scaffoldKey.currentState!.openDrawer();
+                      }
+                    },
+                    icon: GradientIcon(
+                      size: 26,
+                      offset: Offset.zero,
+                      icon: leadingIcon,
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFF387ADF),
+                          Color(0xFF50C4ED),
                         ],
                       ),
                     ),
                   ),
                 ),
-              ),
-              CircleAvatar(
-                radius: 15,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(40),
-                  child: SvgPicture.network(
-                      "https://cdn-expa.aiesec.org/gis-img/missing_profile_${controller.user.fullName![0].toLowerCase()}.svg"),
+                Expanded(
+                  child: Center(
+                    child: Obx(
+                      () => FadeTransition(
+                        opacity: controller.appBarFadeAnim,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  top: controller.appBarType.value == 1 ? 6.0 : 0.0),
+                              child: Text(
+                                title,
+                                style: GoogleFonts.lato(
+                                    color: const Color(0xFF101828),
+                                    fontSize: controller.appBarType.value != 1 ? 20 : 16,
+                                    fontWeight: FontWeight.w700),
+                              ),
+                            ),
+                            if (controller.appBarType.value == 0)
+                              Text(
+                                "Visualize your statistics below!",
+                                style: GoogleFonts.lato(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: const Color(0xFFA6A6A6),
+                                ),
+                              ),
+                            if (controller.appBarType.value == 1)
+                              const Padding(
+                                padding: EdgeInsets.only(top: 8.0),
+                                child: _SearchBar(),
+                              ),
+                            if (controller.appBarType.value == 2)
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "EP ID: ${controller.appBarSelectedEP?.expaEPID == -1 ? "-" : controller.appBarSelectedEP?.expaEPID}",
+                                    style: GoogleFonts.lato(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: const Color(0xFFA6A6A6),
+                                    ),
+                                  ),
+                                  if (controller.appBarSelectedEP?.expaEPID != -1)
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 6.0),
+                                      child: SizedBox(
+                                        height: 24,
+                                        width: 24,
+                                        child: IconButton(
+                                          onPressed: () async {
+                                            String message = "";
+                                            try {
+                                              await Clipboard.setData(ClipboardData(
+                                                  text:
+                                                      "${controller.appBarSelectedEP?.expaEPID}"));
+                                              message = "Copied to clipboard";
+                                            } catch (e) {
+                                              message = "Could not copy ID";
+                                            } finally {
+                                              Get.engine.addPostFrameCallback(
+                                                (timeStamp) {
+                                                  toastification.show(
+                                                    context: context,
+                                                    title: Text(message),
+                                                    type: ToastificationType.info,
+                                                    style: ToastificationStyle.flat,
+                                                    closeOnClick: true,
+                                                    autoCloseDuration: const Duration(
+                                                      seconds: 2,
+                                                    ),
+                                                  );
+                                                },
+                                              );
+                                            }
+                                          },
+                                          iconSize: 16,
+                                          icon: const Icon(
+                                            Icons.file_copy,
+                                          ),
+                                          padding: EdgeInsets.zero,
+                                          color: const Color(0xFFFBA834),
+                                        ),
+                                      ),
+                                    )
+                                ],
+                              )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              )
-            ],
+                CircleAvatar(
+                  radius: 15,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(40),
+                    child: SvgPicture.network(
+                        "https://cdn-expa.aiesec.org/gis-img/missing_profile_${controller.user.fullName![0].toLowerCase()}.svg"),
+                  ),
+                )
+              ],
+            ),
           ),
         );
       },

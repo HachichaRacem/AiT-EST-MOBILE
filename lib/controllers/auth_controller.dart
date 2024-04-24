@@ -4,6 +4,7 @@ import 'package:aiesec_im/controllers/main_controller.dart';
 import 'package:aiesec_im/utils/exception.dart';
 import 'package:aiesec_im/utils/user.dart';
 import 'package:aiesec_im/widgets/debug_dialog.dart';
+import 'package:aiesec_im/widgets/error_dialogs.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
@@ -16,6 +17,7 @@ class AuthController extends GetxController {
   /* General state management */
   final RxBool sendToEXPA = RxBool(false);
   bool caughtAccessToken = false;
+  bool isUserLoggedIn = false;
 
   /* Error management */
   final RxBool hasErrors = RxBool(false);
@@ -26,15 +28,20 @@ class AuthController extends GetxController {
   void onReady() async {
     try {
       await _authenticateUser();
+      isUserLoggedIn = true;
       await Get.dialog(DebugDialog(), barrierDismissible: false);
+      if (MainController.user!.isMC) {
+        await Get.dialog(const McHeadsUpDialog(), barrierDismissible: false);
+      }
       Get.offAllNamed('/home');
     } on NoAccountException {
       sendToEXPA.value = true;
-    } catch (e) {
+    } catch (e, stack) {
       hasErrors.value = true;
       if (e is DioException) {
         errorMessage = 'Could not successfully communicate with EXPA';
       } else {
+        Get.log("$e\n$stack");
         errorMessage = 'Something went wrong';
       }
     }
@@ -94,6 +101,7 @@ class AuthController extends GetxController {
           caughtAccessToken = true;
           await _loadUserData(response['access_token'], response['refresh_token']);
           await _updateSP(response['access_token'], response['refresh_token']);
+          await Get.dialog(DebugDialog(), barrierDismissible: false);
           Get.offAllNamed('/home');
         }
       } on DioException catch (_) {

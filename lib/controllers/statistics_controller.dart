@@ -18,7 +18,7 @@ class StatisticsController extends GetxController {
   }
 
   Future<void> _loadData() async {
-    final response = await MainController.dio.get("/lc_stats/Thyna");
+    final response = await MainController.dio.get("/lc_stats/${MainController.user!.lcName}");
     dataMap.value = response.data;
   }
 }

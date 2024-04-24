@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:aiesec_im/controllers/main_controller.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
@@ -6,6 +7,7 @@ class User {
   String? accessToken, refreshToken;
   String? fullName, position, lcName, firstName, lastName, department;
   int? id, lcID, termID;
+  bool isMC = false;
 
   List<int> focusProducts = [];
   List<Map<String, String>> deptMembers = [];
@@ -16,26 +18,51 @@ class User {
 
     fullName = _getFullName(middleName: data['middle_names']);
     position = (data['current_positions'] as List).last['title'];
-    lcName = ((data['current_offices'] as List).last['name'] as String).capitalizeFirst;
+    if (((data['current_offices'] as List).last['name'] as String).capitalizeFirst == "Tunisia") {
+      final List<String> lcs = [
+        "Bardo",
+        "Bizerte",
+        "Carthage",
+        "Hadrumet",
+        "Medina",
+        "Nabel",
+        "Ruspina",
+        "Sfax",
+        "Tacapes",
+        "Thyna",
+        "University"
+      ];
+      final randomIndex = math.Random().nextInt(10);
+      lcName = lcs[randomIndex];
+      isMC = true;
+    } else {
+      lcName = ((data['current_offices'] as List).last['name'] as String).capitalizeFirst;
+    }
     id = data['id'];
     lcID = (data['current_offices'] as List).last['id'];
 
     for (final String prod in (data['current_positions'] as List).last['focus_products']) {
       focusProducts.add(int.parse(prod));
     }
-    if (focusProducts.length > 1) {
-      department = "OGT";
+    if (focusProducts.isNotEmpty) {
+      if (focusProducts.length > 1) {
+        department = "OGT";
+      } else {
+        switch (focusProducts[0]) {
+          case 7:
+            department = "OGV";
+            break;
+          case 8:
+            department = "OGTa";
+            break;
+          case 9:
+            department = "OGTe";
+            break;
+        }
+      }
     } else {
-      switch (focusProducts[0]) {
-        case 7:
-          department = "OGV";
-          break;
-        case 8:
-          department = "OGTa";
-          break;
-        case 9:
-          department = "OGTe";
-          break;
+      if (isMC) {
+        department = "OGT";
       }
     }
     termID = (data['current_positions'] as List).last['term_id'];
@@ -54,17 +81,19 @@ class User {
         .then((value) {
       final List committeeDepartments =
           value.data['data']['committeeTerm']['committee_departments']['edges'];
-      final departmentElements = committeeDepartments.firstWhere(
-          (element) => element['node']['name'] == department)['node']['member_positions']['edges'];
-      for (final Map member in departmentElements) {
-        if ((member['node']['person']['full_name'] as String).contains("deleted")) {
-          continue;
+      final departmentElements =
+          committeeDepartments.firstWhereOrNull((element) => element['node']['name'] == department);
+      if (departmentElements != null) {
+        for (final Map member in departmentElements['node']['member_positions']['edges']) {
+          if ((member['node']['person']['full_name'] as String).contains("deleted")) {
+            continue;
+          }
+          deptMembers.add({
+            "fullName": member['node']['person']['full_name'],
+            "id": member['node']['person']['id'],
+            "position": member['node']['title']
+          });
         }
-        deptMembers.add({
-          "fullName": member['node']['person']['full_name'],
-          "id": member['node']['person']['id'],
-          "position": member['node']['title']
-        });
       }
     });
   }

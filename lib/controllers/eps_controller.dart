@@ -94,6 +94,7 @@ class EpsController extends GetxController {
       currentState.value = 2;
     } catch (e, stack) {
       Get.log("[EPs Controller]: $e\n$stack");
+
       currentState.value = 1;
     }
     super.onReady();
@@ -104,7 +105,7 @@ class EpsController extends GetxController {
   Future<void> _fetchAllocatedEPs() async {
     final String currentLC = MainController.user!.lcName!;
     final String department = MainController.user!.department!;
-    final String firstName = MainController.user!.firstName!;
+    final String fullName = MainController.user!.fullName!;
 
     List allocatedEPs = [0];
 
@@ -117,7 +118,7 @@ class EpsController extends GetxController {
     int id = 0;
     for (final Map<String, dynamic> epData in response.data) {
       final ExchangeParticipant ep = ExchangeParticipant.fromJson(epData, id);
-      if (ep.memberName.toLowerCase() == firstName.toLowerCase()) {
+      if (ep.memberName.toLowerCase() == fullName.toLowerCase()) {
         // Later add condition to verify department if its the same
         allocatedEPs.add(ep);
       }

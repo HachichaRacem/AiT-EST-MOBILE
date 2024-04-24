@@ -31,9 +31,8 @@ class AssignToDialog extends StatelessWidget {
             .singleWhere((element) => (element as ExchangeParticipant).id == epID);
         if (selectedEP.expaEPID != -1) {
           requestsToSend.add(
-            MainController.dio.put("$baseURL/${selectedEP.expaEPID}", queryParameters: {
-              "newValue": !clear ? _selectedMember.substring(0, 6).trim() : ""
-            }),
+            MainController.dio.put("$baseURL/${selectedEP.expaEPID}",
+                queryParameters: {"newValue": !clear ? _selectedMember.trim() : ""}),
           );
         } else {
           toastification.show(

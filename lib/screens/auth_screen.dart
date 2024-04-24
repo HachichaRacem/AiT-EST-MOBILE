@@ -41,6 +41,12 @@ class AuthScren extends GetView<AuthController> {
                     initialUrlRequest: URLRequest(
                       url: WebUri('https://expa.aiesec.org'),
                     ),
+                    onLoadStop: (webController, url) {
+                      if (url?.rawValue == "https://auth.aiesec.org/users/sign_in" &&
+                          !controller.isUserLoggedIn) {
+                        controller.sendToEXPA.value = true;
+                      }
+                    },
                     onLoadStart: (webController, url) {
                       if (url?.path == '/') {
                         controller.sendToEXPA.value = false;

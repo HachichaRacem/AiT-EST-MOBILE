@@ -1,0 +1,1 @@
+flutter clean && flutter pub get && flutter build apk --split-debug-info=test

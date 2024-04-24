@@ -6,8 +6,6 @@ import 'package:aiesec_im/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'utils/color_scheme.dart';
-
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
@@ -18,7 +16,6 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: lightColorScheme,
         checkboxTheme: CheckboxThemeData(
           fillColor: MaterialStateProperty.resolveWith(
             (states) {
@@ -29,10 +26,6 @@ class MyApp extends StatelessWidget {
             },
           ),
         ),
-      ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        colorScheme: darkColorScheme,
       ),
       initialBinding: BindingsBuilder.put(() => MainController()),
       getPages: [

@@ -261,7 +261,7 @@ class FunnelOverview extends StatelessWidget {
               color: const Color(0xFFFBA834), fontSize: 16, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 16),
-        for (int i = 0; i < data['totals'].values.length - 3; i++)
+        for (int i = 0; i < 7; i++)
           _FunnelItem(
             color: funnelBarsColors[i],
             percent: (data['totals'].values.elementAt(i) / data['totalEPs']),
